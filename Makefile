@@ -38,10 +38,22 @@ lint:
 	@echo "---> Linting..."
 	gometalinter --vendor --tests $(DIRS)
 
+.PHONY: release
+release:
+	@echo "---> Creating new release"
+ifndef tag
+	$(error tag must be specified)
+endif
+	git-chglog --output CHANGELOG.md --next-tag $(tag)
+	git add CHANGELOG.md
+	git commit -m $(tag)
+	git tag $(tag)
+	git push origin master --tags
+
 .PHONY: setup
 setup:
 	@echo "--> Setting up"
-	go get -u -v github.com/alecthomas/gometalinter github.com/golang/dep/cmd/dep
+	go get -u -v github.com/alecthomas/gometalinter github.com/golang/dep/cmd/dep github.com/git-chglog/git-chglog/cmd/git-chglog
 	gometalinter --install
 ifdef PSQL
 	dropdb --if-exists $(TEST_DATABASE_NAME)
