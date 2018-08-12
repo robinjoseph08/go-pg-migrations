@@ -13,8 +13,14 @@ import (
 
 // Errors that can be returned from Run.
 var (
+	ErrAlreadyLocked      = errors.New("migration table is already locked")
 	ErrCreateRequiresName = errors.New("migration name is required for create")
 )
+
+// MigrationOptions allows settings to be configured on a per-migration basis.
+type MigrationOptions struct {
+	DisableTransaction bool
+}
 
 type migration struct {
 	tableName struct{} `sql:"migrations,alias:migrations"`
@@ -53,8 +59,7 @@ func Run(db *pg.DB, directory string, args []string) error {
 
 	switch cmd {
 	case "migrate":
-		fmt.Println("migrate")
-		return nil
+		return migrate(db, directory)
 	case "create":
 		if len(args) < 3 {
 			return ErrCreateRequiresName

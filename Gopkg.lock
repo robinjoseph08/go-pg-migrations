@@ -8,24 +8,35 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/go-pg/pg"
+  packages = [
+    ".",
+    "internal",
+    "internal/parser",
+    "internal/pool",
+    "orm",
+    "types"
+  ]
+  revision = "c0368cd6ee62269f0a5c3d6c9c02c6d192760bc6"
+  version = "v6.14.3"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/jinzhu/inflection"
+  packages = ["."]
+  revision = "04140366298a54a039076d798123ffa108fff46c"
+
+[[projects]]
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
 
 [[projects]]
-  name = "github.com/stretchr/objx"
-  packages = ["."]
-  revision = "477a77ecc69700c7cdeb1fa9e129548e1c1c393c"
-  version = "v0.1.1"
-
-[[projects]]
   name = "github.com/stretchr/testify"
   packages = [
-    ".",
     "assert",
-    "http",
-    "mock"
+    "require"
   ]
   revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
   version = "v1.2.2"
@@ -33,6 +44,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "526e13d0d65cdb9a6dcf0147d467c837761f31a4183ec09a544085b816403008"
+  inputs-digest = "d14d20d4d7271841277101d6ac16cdd9925d8cc83543aba9ce862c94e9e13476"
   solver-name = "gps-cdcl"
   solver-version = 1
