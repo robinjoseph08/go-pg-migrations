@@ -1,0 +1,11 @@
+dist: trusty
+sudo: false
+language: go
+go: 1.10.x
+install:
+  - make setup
+  - make install
+script:
+  - make lint
+  - make test
+  - make enforce
