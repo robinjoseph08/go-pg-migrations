@@ -1,6 +1,9 @@
-# migrations
+# go-pg-migrations
 
 A Go package to help write migrations with [`go-pg/pg`](https://github.com/go-pg/pg).
+
+>**This repo is currently still a work in progress and isn't meant to be used just
+>yet.**
 
 ## Why?
 
