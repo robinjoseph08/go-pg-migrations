@@ -1,8 +1,14 @@
+// Package migrations provides a robust mechanism for registering, creating, and
+// running migrations using go-pg-pg.
 package migrations
 
 import (
 	"errors"
 	"fmt"
+	"time"
+
+	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/orm"
 )
 
 // Errors that can be returned from Run.
@@ -10,8 +16,35 @@ var (
 	ErrCreateRequiresName = errors.New("migration name is required for create")
 )
 
+type migration struct {
+	tableName struct{} `sql:"migrations,alias:migrations"`
+
+	ID          int32
+	Name        string
+	Batch       int32
+	CompletedAt time.Time
+	Up          func(orm.DB) error `sql:"-"`
+	Down        func(orm.DB) error `sql:"-"`
+
+	DisableTransaction bool `sql:"-"`
+}
+
+type lock struct {
+	tableName struct{} `sql:"migration_lock,alias:migration_lock"`
+
+	ID       string
+	IsLocked bool `sql:",notnull"`
+}
+
+const lockID = "lock"
+
 // Run takes in a directory and an argument slice and runs the appropriate command.
-func Run(directory string, args []string) error {
+func Run(db *pg.DB, directory string, args []string) error {
+	err := ensureMigrationTables(db)
+	if err != nil {
+		return err
+	}
+
 	cmd := ""
 
 	if len(args) > 1 {
