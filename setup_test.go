@@ -25,7 +25,7 @@ func TestEnsureMigrationTables(t *testing.T) {
 	tables := []string{"migrations", "migration_lock"}
 
 	for _, table := range tables {
-		assertTable(t, db, table)
+		assertTable(t, db, table, true)
 	}
 
 	assertOneLock(t, db)
@@ -35,7 +35,7 @@ func TestEnsureMigrationTables(t *testing.T) {
 	assert.Nil(t, err)
 
 	for _, table := range tables {
-		assertTable(t, db, table)
+		assertTable(t, db, table, true)
 	}
 
 	assertOneLock(t, db)
@@ -50,8 +50,15 @@ func dropMigrationTables(t *testing.T, db *pg.DB) {
 	assert.Nil(t, err)
 }
 
-func assertTable(t *testing.T, db *pg.DB, table string) {
+func assertTable(t *testing.T, db *pg.DB, table string, exists bool) {
 	t.Helper()
+
+	want := 0
+	msg := "expected %q table to not exist"
+	if exists {
+		want = 1
+		msg = "expected %q table to exist"
+	}
 
 	count, err := orm.NewQuery(db).
 		Table("information_schema.tables").
@@ -59,7 +66,7 @@ func assertTable(t *testing.T, db *pg.DB, table string) {
 		Where("table_schema = current_schema").
 		Count()
 	assert.Nil(t, err)
-	assert.Equalf(t, 1, count, "expected %q table to exist", table)
+	assert.Equalf(t, want, count, msg, table)
 }
 
 func assertOneLock(t *testing.T, db *pg.DB) {

@@ -44,8 +44,8 @@ setup:
 	go get -u -v github.com/alecthomas/gometalinter github.com/golang/dep/cmd/dep
 	gometalinter --install
 ifdef PSQL
-	dropuser --if-exists $(TEST_DATABASE_USER)
 	dropdb --if-exists $(TEST_DATABASE_NAME)
+	dropuser --if-exists $(TEST_DATABASE_USER)
 	createuser --createdb $(TEST_DATABASE_USER)
 	createdb -U $(TEST_DATABASE_USER) $(TEST_DATABASE_NAME)
 else

@@ -1,8 +1,6 @@
 {
   "Enable": [
     "deadcode",
-    "dupl",
-    "errcheck",
     "goconst",
     "gocyclo",
     "gofmt",
