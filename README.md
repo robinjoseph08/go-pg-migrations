@@ -1,11 +1,100 @@
 # go-pg-migrations
 
+[![GoDoc](https://godoc.org/github.com/robinjoseph08/go-pg-migrations?status.svg)](http://godoc.org/github.com/robinjoseph08/go-pg-migrations)
 [![Build Status](https://travis-ci.org/robinjoseph08/go-pg-migrations.svg?branch=master)](https://travis-ci.org/robinjoseph08/go-pg-migrations)
+[![Go Report Card](https://goreportcard.com/badge/github.com/robinjoseph08/go-pg-migrations)](https://goreportcard.com/report/github.com/robinjoseph08/go-pg-migrations)
 
 A Go package to help write migrations with [`go-pg/pg`](https://github.com/go-pg/pg).
 
->**This repo is currently still a work in progress and isn't meant to be used just
->yet.**
+## Usage
+
+### Installation
+
+```sh
+$ go get github.com/robinjoseph08/go-pg-migrations
+```
+
+### Running
+
+To see how this package is intended to be used, you can look at the [example
+directory](/example). All you need to do is have a `main` package (e.g.
+`example`); call `migrations.Run` with the directory you want the migration
+files to be saved in (which will be the same directory of the main package, e.g.
+`example`), an instance of `*pg.DB`, and `os.Args`; and log any potential errors
+that could be returned.
+
+Once this has been set up, then you can use the `create`, `migrate`, `rollback`,
+`help` commands like so:
+
+```
+$ go run example/*.go create create_users_table
+Creating example/20180812001528_create_users_table.go...
+
+$ go run example/*.go migrate
+Running batch 1 with 1 migration(s)...
+Finished running "20180812001528_create_users_table"
+
+$ go run example/*.go rollback
+Rolling back batch 1 with 1 migration(s)...
+Finished rolling back "20180812001528_create_users_table"
+
+$ go run example/*.go help
+Usage:
+  go run example/*.go [command]
+
+Commands:
+  create   - create a new migration in example with the provided name
+  migrate  - run any migrations that haven't been run yet
+  rollback - roll back the previous run batch of migrations
+  help     - print this help text
+
+Examples:
+  go run example/*.go create create_users_table
+  go run example/*.go migrate
+  go run example/*.go rollback
+  go run example/*.go help
+```
+
+While this works when you have the Go toolchain installed, there might be a
+scenario where you have to run migrations and you don't have the toolchain
+available (e.g. in a `scratch` or `alpine` Docker image deployed to production).
+In that case, you should compile another binary (in addition to your actual
+application) and copy it into the final image. This will include all of your
+migrations and allow you to run it by overriding the command when running the
+Docker container.
+
+This would look something like this:
+
+```dockerfile
+# Dockerfile
+FROM golang:1.10.3 as build
+
+RUN curl -fsSL -o /usr/local/bin/dep https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64
+RUN chmod +x /usr/local/bin/dep
+
+WORKDIR /go/src/github.com/sample/service
+
+COPY Gopkg.toml Gopkg.toml
+COPY Gopkg.lock Gopkg.lock
+RUN dep ensure -vendor-only
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -installsuffix cgo -ldflags '-w -s' -o ./bin/serve ./cmd/serve
+RUN CGO_ENABLED=0 GOOS=linux go build -installsuffix cgo -ldflags '-w -s' -o ./bin/migrations ./cmd/migrations
+
+FROM alpine:3.7
+
+RUN apk --no-cache add ca-certificates
+COPY --from=build /go/src/github.com/sample/service/bin /bin
+
+CMD ["serve"]
+```
+
+```sh
+$ docker build -t service:latest .
+$ docker run --rm service:latest migrations migrate
+```
 
 ## Why?
 

@@ -38,5 +38,7 @@ func create(directory, name string) error {
 	fullname := fmt.Sprintf("%s_%s", version, name)
 	filename := path.Join(directory, fmt.Sprintf("%s.go", fullname))
 
+	fmt.Printf("Creating %s...\n", filename)
+
 	return ioutil.WriteFile(filename, []byte(fmt.Sprintf(template, fullname)), 0644)
 }
