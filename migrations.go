@@ -4,7 +4,6 @@ package migrations
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/go-pg/pg"
@@ -69,7 +68,7 @@ func Run(db *pg.DB, directory string, args []string) error {
 	case "rollback":
 		return rollback(db, directory)
 	default:
-		fmt.Println("help")
+		help(directory)
 		return nil
 	}
 }

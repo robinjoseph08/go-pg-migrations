@@ -1,6 +1,7 @@
 package migrations
 
 import (
+	"fmt"
 	"sort"
 	"time"
 
@@ -40,6 +41,7 @@ func migrate(db *pg.DB, directory string) error {
 
 	// if there are no migrations that need to be run, exit early
 	if len(uncompleted) == 0 {
+		fmt.Println("Migrations already up to date")
 		return nil
 	}
 
@@ -56,6 +58,8 @@ func migrate(db *pg.DB, directory string) error {
 		return err
 	}
 	batch = batch + 1
+
+	fmt.Printf("Running batch %d with %d migration(s)...\n", batch, len(uncompleted))
 
 	for _, m := range uncompleted {
 		m.Batch = batch
@@ -76,6 +80,7 @@ func migrate(db *pg.DB, directory string) error {
 		if err != nil {
 			return err
 		}
+		fmt.Printf("Finished running %q\n", m.Name)
 	}
 
 	return nil

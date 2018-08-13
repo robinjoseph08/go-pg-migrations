@@ -1,6 +1,7 @@
 package migrations
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/go-pg/pg"
@@ -32,11 +33,14 @@ func rollback(db *pg.DB, directory string) error {
 	}
 	// if no migrations have been run yet, exit early
 	if batch == 0 {
+		fmt.Println("No migrations have been run yet")
 		return nil
 	}
 
 	rollback := getMigrationsForBatch(completed, batch)
 	rollback = filterMigrations(migrations, rollback, true)
+
+	fmt.Printf("Rolling back batch %d with %d migration(s)...\n", batch, len(rollback))
 
 	for _, m := range rollback {
 		var err error
@@ -55,6 +59,7 @@ func rollback(db *pg.DB, directory string) error {
 		if err != nil {
 			return err
 		}
+		fmt.Printf("Finished rolling back %q\n", m.Name)
 	}
 
 	return nil
