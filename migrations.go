@@ -67,8 +67,7 @@ func Run(db *pg.DB, directory string, args []string) error {
 		name := args[2]
 		return create(directory, name)
 	case "rollback":
-		fmt.Println("rollback")
-		return nil
+		return rollback(db, directory)
 	default:
 		fmt.Println("help")
 		return nil
