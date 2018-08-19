@@ -1,4 +1,9 @@
 DIRS ?= $(shell find . -name '*.go' | grep --invert-match 'vendor' | xargs -n 1 dirname | sort --unique)
+SETUP_PKGS := \
+	github.com/alecthomas/gometalinter \
+	github.com/golang/dep/cmd/dep \
+	github.com/git-chglog/git-chglog/cmd/git-chglog \
+	github.com/mattn/goveralls \
 
 TFLAGS ?=
 
@@ -16,6 +21,10 @@ default: install
 clean:
 	@echo "---> Cleaning"
 	rm -rf ./vendor
+
+coveralls:
+	@echo "---> Sending coverage info to Coveralls"
+	goveralls -coverprofile=$(COVERAGE_PROFILE) -service=travis-ci
 
 .PHONY: enforce
 enforce:
@@ -53,7 +62,7 @@ endif
 .PHONY: setup
 setup:
 	@echo "--> Setting up"
-	go get -u -v github.com/alecthomas/gometalinter github.com/golang/dep/cmd/dep github.com/git-chglog/git-chglog/cmd/git-chglog
+	go get -u -v $(SETUP_PKGS)
 	gometalinter --install
 ifdef PSQL
 	dropdb --if-exists $(TEST_DATABASE_NAME)
