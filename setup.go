@@ -1,8 +1,11 @@
 package migrations
 
-import "github.com/go-pg/pg/orm"
+import (
+	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/orm"
+)
 
-func ensureMigrationTables(db orm.DB) error {
+func ensureMigrationTables(db *pg.DB) error {
 	exists, err := checkIfTableExists("migrations", db)
 	if err != nil {
 		return err
@@ -52,8 +55,7 @@ func checkIfTableExists(name string, db orm.DB) (bool, error) {
 	return count > 0, nil
 }
 
-func createTable(model interface{}, db orm.DB) error {
+func createTable(model interface{}, db *pg.DB) error {
 	opts := orm.CreateTableOptions{IfNotExists: true}
-	_, err := orm.CreateTable(db, model, &opts)
-	return err
+	return db.CreateTable(model, &opts)
 }
