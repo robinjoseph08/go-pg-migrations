@@ -1,4 +1,20 @@
 
+<a name="v0.1.1"></a>
+## [v0.1.1](https://github.com/robinjoseph08/go-pg-migrations/compare/v0.1.0...v0.1.1) (2018-08-23)
+
+### Bug Fixes
+
+* **setup:** Use `*pg.DB.CreateTable` for a consistent interface ([#10](https://github.com/robinjoseph08/go-pg-migrations/issues/10))
+
+### Documentation
+
+* **coveralls:** Send coverage info to Coveralls ([#8](https://github.com/robinjoseph08/go-pg-migrations/issues/8))
+
+### Features
+
+* **errors:** Add migration name for migrate/rollback errors ([#11](https://github.com/robinjoseph08/go-pg-migrations/issues/11))
+
+
 <a name="v0.1.0"></a>
 ## v0.1.0 (2018-08-18)
 
