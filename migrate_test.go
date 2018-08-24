@@ -158,7 +158,7 @@ func TestMigrate(t *testing.T) {
 		}
 
 		err := migrate(db, tmp)
-		assert.EqualError(tt, err, "error")
+		assert.EqualError(tt, err, "123: error")
 
 		assertTable(tt, db, "test_table", false)
 	})
@@ -171,7 +171,7 @@ func TestMigrate(t *testing.T) {
 		}
 
 		err := migrate(db, tmp)
-		assert.EqualError(tt, err, "error")
+		assert.EqualError(tt, err, "123: error")
 
 		assertTable(tt, db, "test_table", true)
 	})

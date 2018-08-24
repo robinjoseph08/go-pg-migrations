@@ -52,12 +52,12 @@ func rollback(db *pg.DB, directory string) error {
 			})
 		}
 		if err != nil {
-			return err
+			return fmt.Errorf("%s: %s", m.Name, err)
 		}
 
 		_, err = db.Model(&m).Where("name = ?", m.Name).Delete()
 		if err != nil {
-			return err
+			return fmt.Errorf("%s: %s", m.Name, err)
 		}
 		fmt.Printf("Finished rolling back %q\n", m.Name)
 	}

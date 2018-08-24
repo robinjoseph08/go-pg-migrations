@@ -72,13 +72,13 @@ func migrate(db *pg.DB, directory string) error {
 			})
 		}
 		if err != nil {
-			return err
+			return fmt.Errorf("%s: %s", m.Name, err)
 		}
 
 		m.CompletedAt = time.Now()
 		err = db.Insert(&m)
 		if err != nil {
-			return err
+			return fmt.Errorf("%s: %s", m.Name, err)
 		}
 		fmt.Printf("Finished running %q\n", m.Name)
 	}
