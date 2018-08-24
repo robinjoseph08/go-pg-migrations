@@ -15,6 +15,7 @@ func main() {
 		Addr:     "localhost:5432",
 		User:     "test_user",
 		Database: "test",
+		Password: "",
 	})
 
 	err := migrations.Run(db, directory, os.Args)
