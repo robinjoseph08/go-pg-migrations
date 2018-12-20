@@ -119,24 +119,23 @@ func filterMigrations(all, subset []migration, wantCompleted bool) []migration {
 }
 
 func acquireLock(db *pg.DB) error {
-	return db.RunInTransaction(func(tx *pg.Tx) error {
-		l := lock{ID: lockID}
+	l := lock{ID: lockID, IsLocked: true}
 
-		err := tx.Model(&l).
-			For("UPDATE").
-			Select()
-		if err != nil {
-			return err
-		}
-		if l.IsLocked {
-			return ErrAlreadyLocked
-		}
+	result, err := db.Model(&l).
+		Column("is_locked").
+		WherePK().
+		Where("is_locked = ?", false).
+		Update()
 
-		l.IsLocked = true
-
-		err = tx.Update(&l)
+	if err != nil {
 		return err
-	})
+	}
+
+	if result.RowsAffected() == 0 {
+		return ErrAlreadyLocked
+	}
+
+	return nil
 }
 
 func releaseLock(db orm.DB) error {
