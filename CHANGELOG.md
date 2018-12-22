@@ -1,4 +1,12 @@
 
+<a name="v0.1.2"></a>
+## [v0.1.2](https://github.com/robinjoseph08/go-pg-migrations/compare/v0.1.1...v0.1.2) (2018-12-22)
+
+### Code Refactoring
+
+* **migrate:** acquire lock in a single statement ([#12](https://github.com/robinjoseph08/go-pg-migrations/issues/12))
+
+
 <a name="v0.1.1"></a>
 ## [v0.1.1](https://github.com/robinjoseph08/go-pg-migrations/compare/v0.1.0...v0.1.1) (2018-08-23)
 
