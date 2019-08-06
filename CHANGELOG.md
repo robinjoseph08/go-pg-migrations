@@ -1,4 +1,12 @@
 
+<a name="v1.0.0"></a>
+## [v1.0.0](https://github.com/robinjoseph08/go-pg-migrations/compare/v0.1.2...v1.0.0) (2019-08-05)
+
+### Features
+
+* **files:** updated timestamp in filename to be UTC ([#13](https://github.com/robinjoseph08/go-pg-migrations/issues/13))
+
+
 <a name="v0.1.2"></a>
 ## [v0.1.2](https://github.com/robinjoseph08/go-pg-migrations/compare/v0.1.1...v0.1.2) (2018-12-22)
 
