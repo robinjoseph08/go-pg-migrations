@@ -34,7 +34,7 @@ func init() {
 `
 
 func create(directory, name string) error {
-	version := time.Now().Format(timeFormat)
+	version := time.Now().UTC().Format(timeFormat)
 	fullname := fmt.Sprintf("%s_%s", version, name)
 	filename := path.Join(directory, fmt.Sprintf("%s.go", fullname))
 
