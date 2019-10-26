@@ -1,4 +1,12 @@
 
+<a name="v1.0.1"></a>
+## [v1.0.1](https://github.com/robinjoseph08/go-pg-migrations/compare/v1.0.0...v1.0.1) (2019-10-26)
+
+### Bug Fixes
+
+* **lock:** Changed migrations.go to use the use_zero flag ([#15](https://github.com/robinjoseph08/go-pg-migrations/issues/15))
+
+
 <a name="v1.0.0"></a>
 ## [v1.0.0](https://github.com/robinjoseph08/go-pg-migrations/compare/v0.1.2...v1.0.0) (2019-08-05)
 
