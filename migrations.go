@@ -38,7 +38,7 @@ type lock struct {
 	tableName struct{} `sql:"migration_lock,alias:migration_lock"`
 
 	ID       string
-	IsLocked bool `sql:",notnull"`
+	IsLocked bool `pg:",use_zero" sql:",notnull"`
 }
 
 const lockID = "lock"
