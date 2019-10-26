@@ -6,8 +6,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/go-pg/pg"
-	"github.com/go-pg/pg/orm"
+	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v9/orm"
 )
 
 // Errors that can be returned from Run.
@@ -22,23 +22,23 @@ type MigrationOptions struct {
 }
 
 type migration struct {
-	tableName struct{} `sql:"migrations,alias:migrations"`
+	tableName struct{} `pg:"migrations,alias:migrations"`
 
 	ID          int32
 	Name        string
 	Batch       int32
 	CompletedAt time.Time
-	Up          func(orm.DB) error `sql:"-"`
-	Down        func(orm.DB) error `sql:"-"`
+	Up          func(orm.DB) error `pg:"-"`
+	Down        func(orm.DB) error `pg:"-"`
 
-	DisableTransaction bool `sql:"-"`
+	DisableTransaction bool `pg:"-"`
 }
 
 type lock struct {
-	tableName struct{} `sql:"migration_lock,alias:migration_lock"`
+	tableName struct{} `pg:"migration_lock,alias:migration_lock"`
 
 	ID       string
-	IsLocked bool `pg:",use_zero" sql:",notnull"`
+	IsLocked bool `pg:",use_zero,notnull"`
 }
 
 const lockID = "lock"

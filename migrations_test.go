@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/v9"
 	"github.com/stretchr/testify/assert"
 )
 

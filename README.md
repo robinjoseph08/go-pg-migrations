@@ -1,5 +1,6 @@
 # go-pg-migrations
 
+[![Version](https://img.shields.io/badge/version-v1.0.1-green.svg)](https://github.com/robinjoseph08/go-pg-migrations/releases)
 [![GoDoc](https://godoc.org/github.com/robinjoseph08/go-pg-migrations?status.svg)](http://godoc.org/github.com/robinjoseph08/go-pg-migrations)
 [![Build Status](https://travis-ci.org/robinjoseph08/go-pg-migrations.svg?branch=master)](https://travis-ci.org/robinjoseph08/go-pg-migrations)
 [![Coverage Status](https://coveralls.io/repos/github/robinjoseph08/go-pg-migrations/badge.svg?branch=master)](https://coveralls.io/github/robinjoseph08/go-pg-migrations?branch=master)
@@ -11,9 +12,16 @@ A Go package to help write migrations with [`go-pg/pg`](https://github.com/go-pg
 
 ### Installation
 
+Because `go-pg` [now has Go modules
+support](https://github.com/go-pg/pg#get-started), `go-pg-migrations` also has
+modules support; it currently depends on v9 of `go-pg`. To install it, use the
+following command in a project with a `go.mod`:
+
 ```sh
-$ go get github.com/robinjoseph08/go-pg-migrations
+$ go get github.com/robinjoseph08/go-pg-migrations/v2
 ```
+
+If you are not yet using Go modules, you can still use v1 of this package.
 
 ### Running
 
@@ -68,26 +76,23 @@ This would look something like this:
 
 ```dockerfile
 # Dockerfile
-FROM golang:1.10.3 as build
+FROM golang:1.13.3 as build
 
-RUN curl -fsSL -o /usr/local/bin/dep https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64
-RUN chmod +x /usr/local/bin/dep
+WORKDIR /app
 
-WORKDIR /go/src/github.com/sample/service
-
-COPY Gopkg.toml Gopkg.toml
-COPY Gopkg.lock Gopkg.lock
-RUN dep ensure -vendor-only
+COPY go.mod go.mod
+COPY go.sum go.sum
+RUN go mod download
 
 COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -installsuffix cgo -ldflags '-w -s' -o ./bin/serve ./cmd/serve
 RUN CGO_ENABLED=0 GOOS=linux go build -installsuffix cgo -ldflags '-w -s' -o ./bin/migrations ./cmd/migrations
 
-FROM alpine:3.7
+FROM alpine:3.8
 
 RUN apk --no-cache add ca-certificates
-COPY --from=build /go/src/github.com/sample/service/bin /bin
+COPY --from=build /app/bin /bin
 
 CMD ["serve"]
 ```

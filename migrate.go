@@ -5,8 +5,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/go-pg/pg"
-	"github.com/go-pg/pg/orm"
+	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v9/orm"
 )
 
 var migrations []migration
@@ -57,7 +57,7 @@ func migrate(db *pg.DB, directory string) error {
 	if err != nil {
 		return err
 	}
-	batch = batch + 1
+	batch++
 
 	fmt.Printf("Running batch %d with %d migration(s)...\n", batch, len(uncompleted))
 
