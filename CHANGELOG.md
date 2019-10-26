@@ -1,4 +1,12 @@
 
+<a name="v2.0.0"></a>
+## [v2.0.0](https://github.com/robinjoseph08/go-pg-migrations/compare/v1.0.1...v2.0.0) (2019-10-26)
+
+### Features
+
+* **modules:** Add go.mod for Go modules ([#16](https://github.com/robinjoseph08/go-pg-migrations/issues/16))
+
+
 <a name="v1.0.1"></a>
 ## [v1.0.1](https://github.com/robinjoseph08/go-pg-migrations/compare/v1.0.0...v1.0.1) (2019-10-26)
 
