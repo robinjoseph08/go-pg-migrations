@@ -12,8 +12,8 @@ const timeFormat = "20060102150405"
 var template = `package main
 
 import (
-	"github.com/go-pg/pg/orm"
-	"github.com/robinjoseph08/go-pg-migrations"
+	"github.com/go-pg/pg/v9/orm"
+	migrations "github.com/robinjoseph08/go-pg-migrations"
 )
 
 func init() {

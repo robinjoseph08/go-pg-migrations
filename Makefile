@@ -1,11 +1,7 @@
-DIRS ?= $(shell find . -name '*.go' | grep --invert-match 'vendor' | xargs -n 1 dirname | sort --unique)
-SETUP_PKGS := \
-	github.com/alecthomas/gometalinter \
-	github.com/golang/dep/cmd/dep \
+BIN_DIR ?= ./bin
+GO_TOOLS := \
 	github.com/git-chglog/git-chglog/cmd/git-chglog \
 	github.com/mattn/goveralls \
-
-TFLAGS ?=
 
 COVERAGE_PROFILE ?= coverage.out
 HTML_OUTPUT      ?= coverage.html
@@ -20,11 +16,12 @@ default: install
 .PHONY: clean
 clean:
 	@echo "---> Cleaning"
-	rm -rf ./vendor
+	go clean
+	rm -rf $(BIN_DIR) $(COVERAGE_PROFILE) $(HTML_OUTPUT)
 
 coveralls:
 	@echo "---> Sending coverage info to Coveralls"
-	goveralls -coverprofile=$(COVERAGE_PROFILE) -service=travis-ci
+	$(BIN_DIR)/goveralls -coverprofile=$(COVERAGE_PROFILE) -service=travis-ci
 
 .PHONY: enforce
 enforce:
@@ -40,12 +37,12 @@ html:
 .PHONY: install
 install:
 	@echo "---> Installing dependencies"
-	dep ensure
+	go mod download
 
 .PHONY: lint
 lint:
 	@echo "---> Linting..."
-	gometalinter --vendor --tests $(DIRS)
+	$(BIN_DIR)/golangci-lint run
 
 .PHONY: release
 release:
@@ -53,8 +50,9 @@ release:
 ifndef tag
 	$(error tag must be specified)
 endif
-	git-chglog --output CHANGELOG.md --next-tag $(tag)
-	git add CHANGELOG.md
+	$(BIN_DIR)/git-chglog --output CHANGELOG.md --next-tag $(tag)
+	sed -i "" "s/version-.*-green/version-$(tag)-green/" README.md
+	git add CHANGELOG.md README.md
 	git commit -m $(tag)
 	git tag $(tag)
 	git push origin master --tags
@@ -62,8 +60,8 @@ endif
 .PHONY: setup
 setup:
 	@echo "--> Setting up"
-	go get -u -v $(SETUP_PKGS)
-	gometalinter --install
+	curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(BIN_DIR) v1.21.0
+	go get $(GO_TOOLS) && GOBIN=$$(pwd)/$(BIN_DIR) go install $(GO_TOOLS)
 ifdef PSQL
 	dropdb --if-exists $(TEST_DATABASE_NAME)
 	dropuser --if-exists $(TEST_DATABASE_USER)
@@ -76,4 +74,4 @@ endif
 .PHONY: test
 test:
 	@echo "---> Testing"
-	TEST_DATABASE_USER=$(TEST_DATABASE_USER) TEST_DATABASE_NAME=$(TEST_DATABASE_NAME) go test ./... -coverprofile $(COVERAGE_PROFILE) $(TFLAGS)
+	TEST_DATABASE_USER=$(TEST_DATABASE_USER) TEST_DATABASE_NAME=$(TEST_DATABASE_NAME) go test ./... -coverprofile $(COVERAGE_PROFILE)

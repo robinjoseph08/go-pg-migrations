@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/v9"
 )
 
 func rollback(db *pg.DB, directory string) error {
