@@ -1,4 +1,12 @@
 
+<a name="v2.0.1"></a>
+## [v2.0.1](https://github.com/robinjoseph08/go-pg-migrations/compare/v2.0.0...v2.0.1) (2019-11-20)
+
+### Bug Fixes
+
+* **create:** update migration template to refer to /v2 ([#18](https://github.com/robinjoseph08/go-pg-migrations/issues/18))
+
+
 <a name="v2.0.0"></a>
 ## [v2.0.0](https://github.com/robinjoseph08/go-pg-migrations/compare/v1.0.1...v2.0.0) (2019-10-26)
 
