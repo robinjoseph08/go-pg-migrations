@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/go-pg/pg/v9"
-	migrations "github.com/robinjoseph08/go-pg-migrations/v2"
+	"github.com/go-pg/pg/v10"
+	migrations "github.com/robinjoseph08/go-pg-migrations/v3"
 )
 
 const directory = "example"

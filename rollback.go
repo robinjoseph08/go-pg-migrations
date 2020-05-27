@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v10"
 )
 
 func rollback(db *pg.DB) error {
@@ -47,7 +47,7 @@ func rollback(db *pg.DB) error {
 		if m.DisableTransaction {
 			err = m.Down(db)
 		} else {
-			err = db.RunInTransaction(func(tx *pg.Tx) error {
+			err = db.RunInTransaction(db.Context(), func(tx *pg.Tx) error {
 				return m.Down(tx)
 			})
 		}

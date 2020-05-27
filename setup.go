@@ -1,8 +1,8 @@
 package migrations
 
 import (
-	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
+	"github.com/go-pg/pg/v10"
+	"github.com/go-pg/pg/v10/orm"
 )
 
 func ensureMigrationTables(db *pg.DB) error {
@@ -34,7 +34,7 @@ func ensureMigrationTables(db *pg.DB) error {
 	}
 	if count == 0 {
 		l := lock{ID: lockID, IsLocked: false}
-		err = db.Insert(&l)
+		_, err = db.Model(&l).Insert()
 		if err != nil {
 			return err
 		}
@@ -57,5 +57,5 @@ func checkIfTableExists(name string, db orm.DB) (bool, error) {
 
 func createTable(model interface{}, db *pg.DB) error {
 	opts := orm.CreateTableOptions{IfNotExists: true}
-	return db.CreateTable(model, &opts)
+	return db.Model(model).CreateTable(&opts)
 }

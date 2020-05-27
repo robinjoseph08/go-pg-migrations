@@ -14,11 +14,11 @@ A Go package to help write migrations with [`go-pg/pg`](https://github.com/go-pg
 
 Because `go-pg` [now has Go modules
 support](https://github.com/go-pg/pg#get-started), `go-pg-migrations` also has
-modules support; it currently depends on v9 of `go-pg`. To install it, use the
+modules support; it currently depends on v10 of `go-pg`. To install it, use the
 following command in a project with a `go.mod`:
 
 ```sh
-$ go get github.com/robinjoseph08/go-pg-migrations/v2
+$ go get github.com/robinjoseph08/go-pg-migrations/v3
 ```
 
 If you are not yet using Go modules, you can still use v1 of this package.
