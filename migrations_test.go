@@ -16,16 +16,16 @@ func TestRun(t *testing.T) {
 		Database: os.Getenv("TEST_DATABASE_NAME"),
 	})
 
-	err := Run(db, tmp, []string{"cmd"})
+	err := Run(nil, tmp, []string{"cmd"})
 	assert.Nil(t, err)
 
 	err = Run(db, tmp, []string{"cmd", "migrate"})
 	assert.Nil(t, err)
 
-	err = Run(db, tmp, []string{"cmd", "create"})
+	err = Run(nil, tmp, []string{"cmd", "create"})
 	assert.Equal(t, ErrCreateRequiresName, err)
 
-	err = Run(db, tmp, []string{"cmd", "create", "test_migration"})
+	err = Run(nil, tmp, []string{"cmd", "create", "test_migration"})
 	assert.Nil(t, err)
 
 	err = Run(db, tmp, []string{"cmd", "rollback"})

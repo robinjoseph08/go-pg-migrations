@@ -143,3 +143,38 @@ experience.
 
 `go-pg` is a great and performant project, and hopefully, this makes it a little
 better.
+
+## Development
+
+To develop on this project, you'll need to have Postgres running because the
+tests depend on it.
+
+If you have it running on your machine because it was installed through your
+package manager (like `brew` or `apt-get`), you just need to run the following
+to get it set up correctly:
+
+```sh
+make setup
+```
+
+If you don't have it on your laptop, you can run the following to start it
+within Docker:
+
+```sh
+make postgres
+```
+
+That should start the container and keep it running while you develop. Once
+you're done, you can `^C` out of it and it will stop the container.
+
+To run the tests, you should run:
+
+```sh
+make test
+```
+
+To run the linter, you should run:
+
+```sh
+make lint
+```
