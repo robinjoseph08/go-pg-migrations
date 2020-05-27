@@ -40,9 +40,21 @@ install:
 	go mod download
 
 .PHONY: lint
-lint:
-	@echo "---> Linting..."
+lint: $(BIN_DIR)/golangci-lint
+	@echo "---> Linting"
 	$(BIN_DIR)/golangci-lint run
+
+.PHONY: postgres
+postgres:
+	@echo "---> Starting Postgres"
+	docker run \
+		--name go-pg-postgres \
+		--rm \
+		-e POSTGRES_DB=$(TEST_DATABASE_NAME) \
+		-e POSTGRES_HOST_AUTH_METHOD=trust \
+		-e POSTGRES_USER=$(TEST_DATABASE_USER) \
+		-p 5432:5432 \
+		postgres:11
 
 .PHONY: release
 release:
@@ -58,18 +70,21 @@ endif
 	git push origin master --tags
 
 .PHONY: setup
-setup:
+setup: $(BIN_DIR)/golangci-lint
 	@echo "--> Setting up"
-	curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(BIN_DIR) v1.21.0
-	go get $(GO_TOOLS) && GOBIN=$$(pwd)/$(BIN_DIR) go install $(GO_TOOLS)
+	GOBIN=$(PWD)/$(BIN_DIR) go install $(GO_TOOLS)
 ifdef PSQL
-	dropdb --if-exists $(TEST_DATABASE_NAME)
-	dropuser --if-exists $(TEST_DATABASE_USER)
-	createuser --createdb $(TEST_DATABASE_USER)
-	createdb -U $(TEST_DATABASE_USER) $(TEST_DATABASE_NAME)
+	dropdb --if-exists $(TEST_DATABASE_NAME) 2> /dev/null && \
+		dropuser --if-exists $(TEST_DATABASE_USER) && \
+		createuser --createdb $(TEST_DATABASE_USER) && \
+		createdb -U $(TEST_DATABASE_USER) $(TEST_DATABASE_NAME) || true
 else
-	$(error Postgres should be installed)
+	$(warning Postgres not installed locally; run `make postgres` to start within Docker)
 endif
+
+$(BIN_DIR)/golangci-lint:
+	@echo "---> Installing linter"
+	curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(BIN_DIR) v1.21.0
 
 .PHONY: test
 test:

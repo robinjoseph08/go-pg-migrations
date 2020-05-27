@@ -45,11 +45,6 @@ const lockID = "lock"
 
 // Run takes in a directory and an argument slice and runs the appropriate command.
 func Run(db *pg.DB, directory string, args []string) error {
-	err := ensureMigrationTables(db)
-	if err != nil {
-		return err
-	}
-
 	cmd := ""
 
 	if len(args) > 1 {
@@ -58,6 +53,11 @@ func Run(db *pg.DB, directory string, args []string) error {
 
 	switch cmd {
 	case "migrate":
+		err := ensureMigrationTables(db)
+		if err != nil {
+			return err
+		}
+
 		return migrate(db, directory)
 	case "create":
 		if len(args) < 3 {
@@ -66,6 +66,11 @@ func Run(db *pg.DB, directory string, args []string) error {
 		name := args[2]
 		return create(directory, name)
 	case "rollback":
+		err := ensureMigrationTables(db)
+		if err != nil {
+			return err
+		}
+
 		return rollback(db, directory)
 	default:
 		help(directory)
