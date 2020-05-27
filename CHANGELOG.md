@@ -1,4 +1,12 @@
 
+<a name="v2.1.0"></a>
+## [v2.1.0](https://github.com/robinjoseph08/go-pg-migrations/compare/v2.0.1...v2.1.0) (2020-05-26)
+
+### Bug Fixes
+
+* **db:** remove need of db connection for create and help ([#23](https://github.com/robinjoseph08/go-pg-migrations/issues/23))
+
+
 <a name="v2.0.1"></a>
 ## [v2.0.1](https://github.com/robinjoseph08/go-pg-migrations/compare/v2.0.0...v2.0.1) (2019-11-20)
 
