@@ -58,7 +58,7 @@ func Run(db *pg.DB, directory string, args []string) error {
 			return err
 		}
 
-		return migrate(db, directory)
+		return migrate(db)
 	case "create":
 		if len(args) < 3 {
 			return ErrCreateRequiresName
@@ -71,7 +71,7 @@ func Run(db *pg.DB, directory string, args []string) error {
 			return err
 		}
 
-		return rollback(db, directory)
+		return rollback(db)
 	default:
 		help(directory)
 		return nil
