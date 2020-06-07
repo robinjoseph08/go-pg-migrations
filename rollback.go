@@ -7,7 +7,7 @@ import (
 	"github.com/go-pg/pg/v9"
 )
 
-func rollback(db *pg.DB, directory string) error {
+func rollback(db *pg.DB) error {
 	// sort the registered migrations by name (which will sort by the
 	// timestamp in their names)
 	sort.Slice(migrations, func(i, j int) bool {

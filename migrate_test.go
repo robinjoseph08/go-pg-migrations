@@ -41,7 +41,6 @@ func TestRegister(t *testing.T) {
 }
 
 func TestMigrate(t *testing.T) {
-	tmp := os.TempDir()
 	db := pg.Connect(&pg.Options{
 		Addr:     "localhost:5432",
 		User:     os.Getenv("TEST_DATABASE_USER"),
@@ -62,7 +61,7 @@ func TestMigrate(t *testing.T) {
 			{Name: "123", Up: noopMigration, Down: noopMigration},
 		}
 
-		err := migrate(db, tmp)
+		err := migrate(db)
 		assert.Nil(tt, err)
 
 		assert.Equal(tt, "123", migrations[0].Name)
@@ -80,7 +79,7 @@ func TestMigrate(t *testing.T) {
 		err := db.Insert(&migrations[0])
 		assert.Nil(tt, err)
 
-		err = migrate(db, tmp)
+		err = migrate(db)
 		assert.Nil(tt, err)
 
 		var m []migration
@@ -102,7 +101,7 @@ func TestMigrate(t *testing.T) {
 		err := db.Insert(&migrations)
 		assert.Nil(tt, err)
 
-		err = migrate(db, tmp)
+		err = migrate(db)
 		assert.Nil(tt, err)
 
 		count, err := db.Model(&migration{}).Where("batch = 2").Count()
@@ -122,7 +121,7 @@ func TestMigrate(t *testing.T) {
 		assert.Nil(tt, err)
 		defer releaseLock(db)
 
-		err = migrate(db, tmp)
+		err = migrate(db)
 		assert.Equal(tt, ErrAlreadyLocked, err)
 	})
 
@@ -138,7 +137,7 @@ func TestMigrate(t *testing.T) {
 		err := db.Insert(&migrations[0])
 		assert.Nil(tt, err)
 
-		err = migrate(db, tmp)
+		err = migrate(db)
 		assert.Nil(tt, err)
 
 		batch, err := getLastBatchNumber(db)
@@ -157,7 +156,7 @@ func TestMigrate(t *testing.T) {
 			{Name: "123", Up: erringMigration, Down: noopMigration, DisableTransaction: false},
 		}
 
-		err := migrate(db, tmp)
+		err := migrate(db)
 		assert.EqualError(tt, err, "123: error")
 
 		assertTable(tt, db, "test_table", false)
@@ -170,7 +169,7 @@ func TestMigrate(t *testing.T) {
 			{Name: "123", Up: erringMigration, Down: noopMigration, DisableTransaction: true},
 		}
 
-		err := migrate(db, tmp)
+		err := migrate(db)
 		assert.EqualError(tt, err, "123: error")
 
 		assertTable(tt, db, "test_table", true)

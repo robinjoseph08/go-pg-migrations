@@ -11,7 +11,6 @@ import (
 )
 
 func TestRollback(t *testing.T) {
-	tmp := os.TempDir()
 	db := pg.Connect(&pg.Options{
 		Addr:     "localhost:5432",
 		User:     os.Getenv("TEST_DATABASE_USER"),
@@ -32,7 +31,7 @@ func TestRollback(t *testing.T) {
 			{Name: "456", Up: noopMigration, Down: noopMigration},
 		}
 
-		err := rollback(db, tmp)
+		err := rollback(db)
 		assert.Nil(tt, err)
 
 		assert.Equal(tt, "456", migrations[0].Name)
@@ -51,7 +50,7 @@ func TestRollback(t *testing.T) {
 		assert.Nil(tt, err)
 		defer releaseLock(db)
 
-		err = rollback(db, tmp)
+		err = rollback(db)
 		assert.Equal(tt, ErrAlreadyLocked, err)
 	})
 
@@ -63,7 +62,7 @@ func TestRollback(t *testing.T) {
 			{Name: "456", Up: noopMigration, Down: noopMigration},
 		}
 
-		err := rollback(db, tmp)
+		err := rollback(db)
 		assert.Nil(tt, err)
 
 		count, err := db.Model(&migration{}).Count()
@@ -85,7 +84,7 @@ func TestRollback(t *testing.T) {
 		err := db.Insert(&m)
 		assert.Nil(tt, err)
 
-		err = rollback(db, tmp)
+		err = rollback(db)
 		assert.Nil(tt, err)
 
 		batch, err := getLastBatchNumber(db)
@@ -107,7 +106,7 @@ func TestRollback(t *testing.T) {
 		err := db.Insert(&migrations)
 		assert.Nil(tt, err)
 
-		err = rollback(db, tmp)
+		err = rollback(db)
 		assert.EqualError(tt, err, "123: error")
 
 		assertTable(tt, db, "test_table", false)
@@ -123,7 +122,7 @@ func TestRollback(t *testing.T) {
 		err := db.Insert(&migrations)
 		assert.Nil(tt, err)
 
-		err = rollback(db, tmp)
+		err = rollback(db)
 		assert.EqualError(tt, err, "123: error")
 
 		assertTable(tt, db, "test_table", true)
