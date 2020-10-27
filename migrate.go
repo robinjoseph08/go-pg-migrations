@@ -5,8 +5,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
+	"github.com/go-pg/pg/v10"
+	"github.com/go-pg/pg/v10/orm"
 )
 
 var migrations []migration
@@ -22,7 +22,7 @@ func Register(name string, up, down func(orm.DB) error, opts MigrationOptions) {
 	})
 }
 
-func migrate(db *pg.DB) error {
+func migrate(db *pg.DB) (err error) {
 	// sort the registered migrations by name (which will sort by the
 	// timestamp in their names)
 	sort.Slice(migrations, func(i, j int) bool {
@@ -50,7 +50,12 @@ func migrate(db *pg.DB) error {
 	if err != nil {
 		return err
 	}
-	defer releaseLock(db)
+	defer func() {
+		e := releaseLock(db)
+		if e != nil && err == nil {
+			err = e
+		}
+	}()
 
 	// find the last batch number
 	batch, err := getLastBatchNumber(db)
@@ -67,7 +72,7 @@ func migrate(db *pg.DB) error {
 		if m.DisableTransaction {
 			err = m.Up(db)
 		} else {
-			err = db.RunInTransaction(func(tx *pg.Tx) error {
+			err = db.RunInTransaction(db.Context(), func(tx *pg.Tx) error {
 				return m.Up(tx)
 			})
 		}
@@ -76,7 +81,7 @@ func migrate(db *pg.DB) error {
 		}
 
 		m.CompletedAt = time.Now()
-		err = db.Insert(&m)
+		_, err = db.Model(&m).Insert()
 		if err != nil {
 			return fmt.Errorf("%s: %s", m.Name, err)
 		}
@@ -140,7 +145,10 @@ func acquireLock(db *pg.DB) error {
 
 func releaseLock(db orm.DB) error {
 	l := lock{ID: lockID, IsLocked: false}
-	return db.Update(&l)
+	_, err := db.Model(&l).
+		WherePK().
+		Update()
+	return err
 }
 
 func getLastBatchNumber(db orm.DB) (int32, error) {

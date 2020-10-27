@@ -1,13 +1,15 @@
 package migrations
 
 import (
+	"context"
 	"errors"
+	"log"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
+	"github.com/go-pg/pg/v10"
+	"github.com/go-pg/pg/v10/orm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -47,6 +49,8 @@ func TestMigrate(t *testing.T) {
 		Database: os.Getenv("TEST_DATABASE_NAME"),
 	})
 
+	db.AddQueryHook(logQueryHook{})
+
 	err := ensureMigrationTables(db)
 	require.Nil(t, err)
 
@@ -76,7 +80,7 @@ func TestMigrate(t *testing.T) {
 			{Name: "456", Up: noopMigration, Down: noopMigration},
 		}
 
-		err := db.Insert(&migrations[0])
+		_, err := db.Model(&migrations[0]).Insert()
 		assert.Nil(tt, err)
 
 		err = migrate(db)
@@ -98,7 +102,7 @@ func TestMigrate(t *testing.T) {
 			{Name: "456", Up: noopMigration, Down: noopMigration, Batch: 1, CompletedAt: time.Now()},
 		}
 
-		err := db.Insert(&migrations)
+		_, err := db.Model(&migrations).Insert()
 		assert.Nil(tt, err)
 
 		err = migrate(db)
@@ -134,7 +138,7 @@ func TestMigrate(t *testing.T) {
 			{Name: "789", Up: noopMigration, Down: noopMigration},
 		}
 
-		err := db.Insert(&migrations[0])
+		_, err := db.Model(&migrations[0]).Insert()
 		assert.Nil(tt, err)
 
 		err = migrate(db)
@@ -174,6 +178,23 @@ func TestMigrate(t *testing.T) {
 
 		assertTable(tt, db, "test_table", true)
 	})
+}
+
+type logQueryHook struct{}
+
+func (logQueryHook) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (context.Context, error) {
+	return ctx, nil
+}
+
+func (qh logQueryHook) AfterQuery(ctx context.Context, event *pg.QueryEvent) error {
+	query, err := event.FormattedQuery()
+	if err != nil {
+		return err
+	}
+
+	log.Println(string(query))
+
+	return nil
 }
 
 func resetMigrations(t *testing.T) {
