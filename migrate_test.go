@@ -180,7 +180,7 @@ func TestMigrate(t *testing.T) {
 	})
 }
 
-type logQueryHook struct {}
+type logQueryHook struct{}
 
 func (logQueryHook) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (context.Context, error) {
 	return ctx, nil
