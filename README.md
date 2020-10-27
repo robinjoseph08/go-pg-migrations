@@ -1,6 +1,6 @@
 # go-pg-migrations
 
-[![Version](https://img.shields.io/badge/version-v2.1.0-green.svg)](https://github.com/robinjoseph08/go-pg-migrations/releases)
+[![Version](https://img.shields.io/badge/version-v3.0.0-green.svg)](https://github.com/robinjoseph08/go-pg-migrations/releases)
 [![GoDoc](https://godoc.org/github.com/robinjoseph08/go-pg-migrations?status.svg)](http://godoc.org/github.com/robinjoseph08/go-pg-migrations)
 [![Build Status](https://travis-ci.org/robinjoseph08/go-pg-migrations.svg?branch=master)](https://travis-ci.org/robinjoseph08/go-pg-migrations)
 [![Coverage Status](https://coveralls.io/repos/github/robinjoseph08/go-pg-migrations/badge.svg?branch=master)](https://coveralls.io/github/robinjoseph08/go-pg-migrations?branch=master)

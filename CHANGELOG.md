@@ -1,4 +1,16 @@
 
+<a name="v3.0.0"></a>
+## [v3.0.0](https://github.com/robinjoseph08/go-pg-migrations/compare/v2.1.0...v3.0.0) (2020-10-26)
+
+### Chore
+
+* **directory:** don't unnecessarily pass in directory ([#25](https://github.com/robinjoseph08/go-pg-migrations/issues/25))
+
+### Features
+
+* **go-pg:** update from go-pg v9 to v10 ([#27](https://github.com/robinjoseph08/go-pg-migrations/issues/27))
+
+
 <a name="v2.1.0"></a>
 ## [v2.1.0](https://github.com/robinjoseph08/go-pg-migrations/compare/v2.0.1...v2.1.0) (2020-05-26)
 
