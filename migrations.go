@@ -4,6 +4,7 @@ package migrations
 
 import (
 	"errors"
+	"os"
 	"time"
 
 	"github.com/go-pg/pg/v10"
@@ -72,6 +73,13 @@ func Run(db *pg.DB, directory string, args []string) error {
 		}
 
 		return rollback(db)
+	case "status":
+		err := ensureMigrationTables(db)
+		if err != nil {
+			return err
+		}
+
+		return status(db, os.Stdout)
 	default:
 		help(directory)
 		return nil
