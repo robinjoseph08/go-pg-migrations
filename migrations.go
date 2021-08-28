@@ -72,6 +72,13 @@ func Run(db *pg.DB, directory string, args []string) error {
 		}
 
 		return rollback(db)
+	case "status":
+		err := ensureMigrationTables(db)
+		if err != nil {
+			return err
+		}
+
+		return migrationStatus(db)
 	default:
 		help(directory)
 		return nil
