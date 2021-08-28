@@ -9,6 +9,7 @@ Commands:
   create   - create a new migration in %s with the provided name
   migrate  - run any migrations that haven't been run yet
   rollback - roll back the previous run batch of migrations
+  status   - check if there are pending migrations
   help     - print this help text
 
 Examples:

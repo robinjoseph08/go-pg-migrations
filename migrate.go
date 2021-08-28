@@ -23,21 +23,10 @@ func Register(name string, up, down func(orm.DB) error, opts MigrationOptions) {
 }
 
 func migrate(db *pg.DB) (err error) {
-	// sort the registered migrations by name (which will sort by the
-	// timestamp in their names)
-	sort.Slice(migrations, func(i, j int) bool {
-		return migrations[i].Name < migrations[j].Name
-	})
-
-	// look at the migrations table to see the already run migrations
-	completed, err := getCompletedMigrations(db)
+	uncompleted, err := getUncompletedMigrations(db)
 	if err != nil {
 		return err
 	}
-
-	// diff the completed migrations from the registered migrations to find
-	// the migrations we still need to run
-	uncompleted := filterMigrations(migrations, completed, false)
 
 	// if there are no migrations that need to be run, exit early
 	if len(uncompleted) == 0 {
@@ -89,6 +78,26 @@ func migrate(db *pg.DB) (err error) {
 	}
 
 	return nil
+}
+
+func getUncompletedMigrations(db orm.DB) ([]migration, error) {
+	// sort the registered migrations by name (which will sort by the
+	// timestamp in their names)
+	sort.Slice(migrations, func(i, j int) bool {
+		return migrations[i].Name < migrations[j].Name
+	})
+
+	// look at the migrations table to see the already run migrations
+	completed, err := getCompletedMigrations(db)
+	if err != nil {
+		return nil, err
+	}
+
+	// diff the completed migrations from the registered migrations to find
+	// the migrations we still need to run
+	uncompleted := filterMigrations(migrations, completed, false)
+
+	return uncompleted, nil
 }
 
 func getCompletedMigrations(db orm.DB) ([]migration, error) {
