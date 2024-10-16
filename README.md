@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/badge/version-v3.0.0-green.svg)](https://github.com/robinjoseph08/go-pg-migrations/releases)
 [![GoDoc](https://godoc.org/github.com/robinjoseph08/go-pg-migrations?status.svg)](http://godoc.org/github.com/robinjoseph08/go-pg-migrations)
-[![Build Status](https://travis-ci.org/robinjoseph08/go-pg-migrations.svg?branch=master)](https://travis-ci.org/robinjoseph08/go-pg-migrations)
+[![Build Status](https://github.com/robinjoseph08/go-pg-migrations/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/robinjoseph08/go-pg-migrations/actions)
 [![Coverage Status](https://coveralls.io/repos/github/robinjoseph08/go-pg-migrations/badge.svg?branch=master)](https://coveralls.io/github/robinjoseph08/go-pg-migrations?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/robinjoseph08/go-pg-migrations)](https://goreportcard.com/report/github.com/robinjoseph08/go-pg-migrations)
 

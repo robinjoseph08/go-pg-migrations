@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: ["master"]
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -47,3 +47,5 @@ jobs:
 
     - name: Coveralls
       run: make coveralls
+      env:
+        COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
