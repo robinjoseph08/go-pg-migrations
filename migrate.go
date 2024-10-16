@@ -9,12 +9,12 @@ import (
 	"github.com/go-pg/pg/v10/orm"
 )
 
-var migrations []migration
+var migrations []*migration
 
 // Register accepts a name, up, down, and options and adds the migration to the
 // global migrations slice.
 func Register(name string, up, down func(orm.DB) error, opts MigrationOptions) {
-	migrations = append(migrations, migration{
+	migrations = append(migrations, &migration{
 		Name:               name,
 		Up:                 up,
 		Down:               down,
@@ -81,7 +81,7 @@ func migrate(db *pg.DB) (err error) {
 		}
 
 		m.CompletedAt = time.Now()
-		_, err = db.Model(&m).Insert()
+		_, err = db.Model(m).Insert()
 		if err != nil {
 			return fmt.Errorf("%s: %s", m.Name, err)
 		}
@@ -91,8 +91,8 @@ func migrate(db *pg.DB) (err error) {
 	return nil
 }
 
-func getCompletedMigrations(db orm.DB) ([]migration, error) {
-	var completed []migration
+func getCompletedMigrations(db orm.DB) ([]*migration, error) {
+	var completed []*migration
 
 	err := db.
 		Model(&completed).
@@ -105,14 +105,14 @@ func getCompletedMigrations(db orm.DB) ([]migration, error) {
 	return completed, nil
 }
 
-func filterMigrations(all, subset []migration, wantCompleted bool) []migration {
+func filterMigrations(all, subset []*migration, wantCompleted bool) []*migration {
 	subsetMap := map[string]bool{}
 
 	for _, c := range subset {
 		subsetMap[c.Name] = true
 	}
 
-	var d []migration
+	var d []*migration
 
 	for _, a := range all {
 		if subsetMap[a.Name] == wantCompleted {

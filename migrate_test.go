@@ -60,7 +60,7 @@ func TestMigrate(t *testing.T) {
 	t.Run("sorts migrations", func(tt *testing.T) {
 		clearMigrations(tt, db)
 		resetMigrations(tt)
-		migrations = []migration{
+		migrations = []*migration{
 			{Name: "456", Up: noopMigration, Down: noopMigration},
 			{Name: "123", Up: noopMigration, Down: noopMigration},
 		}
@@ -75,18 +75,18 @@ func TestMigrate(t *testing.T) {
 	t.Run("only runs uncompleted migrations", func(tt *testing.T) {
 		clearMigrations(tt, db)
 		resetMigrations(tt)
-		migrations = []migration{
+		migrations = []*migration{
 			{Name: "123", Up: noopMigration, Down: noopMigration, Batch: 1, CompletedAt: time.Now()},
 			{Name: "456", Up: noopMigration, Down: noopMigration},
 		}
 
-		_, err := db.Model(&migrations[0]).Insert()
+		_, err := db.Model(migrations[0]).Insert()
 		assert.Nil(tt, err)
 
 		err = migrate(db)
 		assert.Nil(tt, err)
 
-		var m []migration
+		var m []*migration
 		err = db.Model(&m).Order("name").Select()
 		assert.Nil(tt, err)
 		require.Len(tt, m, 2)
@@ -97,7 +97,7 @@ func TestMigrate(t *testing.T) {
 	t.Run("exits early if there aren't any migrations to run", func(tt *testing.T) {
 		clearMigrations(tt, db)
 		resetMigrations(tt)
-		migrations = []migration{
+		migrations = []*migration{
 			{Name: "123", Up: noopMigration, Down: noopMigration, Batch: 1, CompletedAt: time.Now()},
 			{Name: "456", Up: noopMigration, Down: noopMigration, Batch: 1, CompletedAt: time.Now()},
 		}
@@ -116,7 +116,7 @@ func TestMigrate(t *testing.T) {
 	t.Run("returns an error if the migration lock is already held", func(tt *testing.T) {
 		clearMigrations(tt, db)
 		resetMigrations(tt)
-		migrations = []migration{
+		migrations = []*migration{
 			{Name: "123", Up: noopMigration, Down: noopMigration},
 			{Name: "456", Up: noopMigration, Down: noopMigration},
 		}
@@ -132,13 +132,13 @@ func TestMigrate(t *testing.T) {
 	t.Run("increments batch number for each run and associates all migrations with it", func(tt *testing.T) {
 		clearMigrations(tt, db)
 		resetMigrations(tt)
-		migrations = []migration{
+		migrations = []*migration{
 			{Name: "123", Up: noopMigration, Down: noopMigration, Batch: 5, CompletedAt: time.Now()},
 			{Name: "456", Up: noopMigration, Down: noopMigration},
 			{Name: "789", Up: noopMigration, Down: noopMigration},
 		}
 
-		_, err := db.Model(&migrations[0]).Insert()
+		_, err := db.Model(migrations[0]).Insert()
 		assert.Nil(tt, err)
 
 		err = migrate(db)
@@ -156,7 +156,7 @@ func TestMigrate(t *testing.T) {
 	t.Run(`runs "up" within a transaction if specified`, func(tt *testing.T) {
 		clearMigrations(tt, db)
 		resetMigrations(tt)
-		migrations = []migration{
+		migrations = []*migration{
 			{Name: "123", Up: erringMigration, Down: noopMigration, DisableTransaction: false},
 		}
 
@@ -169,7 +169,7 @@ func TestMigrate(t *testing.T) {
 	t.Run(`doesn't run "up" within a transaction if specified`, func(tt *testing.T) {
 		clearMigrations(tt, db)
 		resetMigrations(tt)
-		migrations = []migration{
+		migrations = []*migration{
 			{Name: "123", Up: erringMigration, Down: noopMigration, DisableTransaction: true},
 		}
 
@@ -182,11 +182,11 @@ func TestMigrate(t *testing.T) {
 
 type logQueryHook struct{}
 
-func (logQueryHook) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (context.Context, error) {
+func (logQueryHook) BeforeQuery(ctx context.Context, _ *pg.QueryEvent) (context.Context, error) {
 	return ctx, nil
 }
 
-func (qh logQueryHook) AfterQuery(ctx context.Context, event *pg.QueryEvent) error {
+func (qh logQueryHook) AfterQuery(_ context.Context, event *pg.QueryEvent) error {
 	query, err := event.FormattedQuery()
 	if err != nil {
 		return err
@@ -199,7 +199,7 @@ func (qh logQueryHook) AfterQuery(ctx context.Context, event *pg.QueryEvent) err
 
 func resetMigrations(t *testing.T) {
 	t.Helper()
-	migrations = []migration{}
+	migrations = []*migration{}
 }
 
 func clearMigrations(t *testing.T, db *pg.DB) {
@@ -211,7 +211,7 @@ func clearMigrations(t *testing.T, db *pg.DB) {
 	assert.Nil(t, err)
 }
 
-func noopMigration(db orm.DB) error {
+func noopMigration(_ orm.DB) error {
 	return nil
 }
 

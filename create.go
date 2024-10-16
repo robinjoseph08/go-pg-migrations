@@ -2,7 +2,7 @@ package migrations
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path"
 	"time"
 )
@@ -36,9 +36,9 @@ func init() {
 func create(directory, name string) error {
 	version := time.Now().UTC().Format(timeFormat)
 	fullname := fmt.Sprintf("%s_%s", version, name)
-	filename := path.Join(directory, fmt.Sprintf("%s.go", fullname))
+	filename := path.Join(directory, fullname+".go")
 
 	fmt.Printf("Creating %s...\n", filename)
 
-	return ioutil.WriteFile(filename, []byte(fmt.Sprintf(template, fullname)), 0644)
+	return os.WriteFile(filename, []byte(fmt.Sprintf(template, fullname)), 0644)
 }
