@@ -1,25 +1,44 @@
-output:
-  format: tab
 linters:
   disable-all: true
   enable:
-    - deadcode
-    - depguard
-    - dupl
-    - goconst
+    - asciicheck
+    - bodyclose
+    - copyloopvar
+    - decorder
+    - dogsled
+    - dupword
+    - err113
+    - errcheck
+    - exhaustive
+    - gocheckcompilerdirectives
     - gocritic
-    - gocyclo
-    - gofmt
+    - godot
+    - goheader
     - goimports
-    - golint
     - gosec
+    - gosimple
     - govet
+    - grouper
+    - importas
+    - inamedparam
     - ineffassign
+    - interfacebloat
     - misspell
-    - prealloc
+    - nosprintfhostport
+    - perfsprint
+    - predeclared
+    - revive
+    - staticcheck
+    - stylecheck
     - typecheck
     - unconvert
-    - varcheck
+    - unparam
+    - unused
+    - whitespace
+linters-settings:
+  gosec:
+    excludes:
+      - G306 # Expect WriteFile permissions to be 0600 or less
 issues:
   exclude-use-default: false
   max-per-linter: 0
@@ -28,3 +47,22 @@ issues:
     - path: _test\.go
       linters:
         - dupl
+    - path: create_test.go
+      text: G404 # Use of weak random number generator
+    # The tableName struct field is used by go-pg, even if we don't use it
+    # directly.
+    - linters:
+        - unused
+      text: tableName
+    # We don't care about any errors from the releaseLock function.
+    - linters:
+        - errcheck
+      source: releaseLock
+    # We don't care about package comments.
+    - linters:
+        - revive
+      text: package-comments
+    # We return dynamic errors.
+    - linters:
+        - err113
+      text: do not define dynamic errors

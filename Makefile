@@ -84,9 +84,9 @@ endif
 
 $(BIN_DIR)/golangci-lint:
 	@echo "---> Installing linter"
-	curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(BIN_DIR) v1.21.0
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(BIN_DIR) v1.61.0
 
 .PHONY: test
 test:
 	@echo "---> Testing"
-	TEST_DATABASE_USER=$(TEST_DATABASE_USER) TEST_DATABASE_NAME=$(TEST_DATABASE_NAME) go test -v . -coverprofile $(COVERAGE_PROFILE)
+	TEST_DATABASE_USER=$(TEST_DATABASE_USER) TEST_DATABASE_NAME=$(TEST_DATABASE_NAME) go test . -coverprofile $(COVERAGE_PROFILE)

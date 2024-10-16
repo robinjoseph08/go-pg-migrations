@@ -55,7 +55,7 @@ func rollback(db *pg.DB) error {
 			return fmt.Errorf("%s: %s", m.Name, err)
 		}
 
-		_, err = db.Model(&m).Where("name = ?", m.Name).Delete()
+		_, err = db.Model(m).Where("name = ?", m.Name).Delete()
 		if err != nil {
 			return fmt.Errorf("%s: %s", m.Name, err)
 		}
@@ -65,8 +65,8 @@ func rollback(db *pg.DB) error {
 	return nil
 }
 
-func getMigrationsForBatch(migrations []migration, batch int32) []migration {
-	var m []migration
+func getMigrationsForBatch(migrations []*migration, batch int32) []*migration {
+	var m []*migration
 
 	for _, migration := range migrations {
 		if migration.Batch == batch {

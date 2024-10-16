@@ -26,7 +26,7 @@ func TestRollback(t *testing.T) {
 	t.Run("sorts migrations in reverse order", func(tt *testing.T) {
 		clearMigrations(tt, db)
 		resetMigrations(tt)
-		migrations = []migration{
+		migrations = []*migration{
 			{Name: "123", Up: noopMigration, Down: noopMigration},
 			{Name: "456", Up: noopMigration, Down: noopMigration},
 		}
@@ -41,7 +41,7 @@ func TestRollback(t *testing.T) {
 	t.Run("returns an error if the migration lock is already held", func(tt *testing.T) {
 		clearMigrations(tt, db)
 		resetMigrations(tt)
-		migrations = []migration{
+		migrations = []*migration{
 			{Name: "123", Up: noopMigration, Down: noopMigration},
 			{Name: "456", Up: noopMigration, Down: noopMigration},
 		}
@@ -57,7 +57,7 @@ func TestRollback(t *testing.T) {
 	t.Run("exits early if there aren't any migrations to rollback", func(tt *testing.T) {
 		clearMigrations(tt, db)
 		resetMigrations(tt)
-		migrations = []migration{
+		migrations = []*migration{
 			{Name: "123", Up: noopMigration, Down: noopMigration},
 			{Name: "456", Up: noopMigration, Down: noopMigration},
 		}
@@ -73,7 +73,7 @@ func TestRollback(t *testing.T) {
 	t.Run("only rolls back the last batch", func(tt *testing.T) {
 		clearMigrations(tt, db)
 		resetMigrations(tt)
-		migrations = []migration{
+		migrations = []*migration{
 			{Name: "123", Up: noopMigration, Down: noopMigration, Batch: 4, CompletedAt: time.Now()},
 			{Name: "456", Up: noopMigration, Down: noopMigration, Batch: 5, CompletedAt: time.Now()},
 			{Name: "789", Up: noopMigration, Down: noopMigration, Batch: 5, CompletedAt: time.Now()},
@@ -99,7 +99,7 @@ func TestRollback(t *testing.T) {
 	t.Run(`runs "down" within a transaction if specified`, func(tt *testing.T) {
 		clearMigrations(tt, db)
 		resetMigrations(tt)
-		migrations = []migration{
+		migrations = []*migration{
 			{Name: "123", Up: noopMigration, Down: erringMigration, DisableTransaction: false, Batch: 1, CompletedAt: time.Now()},
 		}
 
@@ -115,7 +115,7 @@ func TestRollback(t *testing.T) {
 	t.Run(`doesn't run "down" within a transaction if specified`, func(tt *testing.T) {
 		clearMigrations(tt, db)
 		resetMigrations(tt)
-		migrations = []migration{
+		migrations = []*migration{
 			{Name: "123", Up: noopMigration, Down: erringMigration, DisableTransaction: true, Batch: 1, CompletedAt: time.Now()},
 		}
 

@@ -2,7 +2,6 @@ package migrations
 
 import (
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"strings"
@@ -20,7 +19,7 @@ func TestCreate(t *testing.T) {
 	err := create(tmp, name)
 	assert.Nil(t, err)
 
-	files, err := ioutil.ReadDir(tmp)
+	files, err := os.ReadDir(tmp)
 	assert.Nil(t, err)
 
 	found := false
