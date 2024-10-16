@@ -21,7 +21,7 @@ clean:
 
 coveralls:
 	@echo "---> Sending coverage info to Coveralls"
-	$(BIN_DIR)/goveralls -coverprofile=$(COVERAGE_PROFILE) -service=travis-ci
+	$(BIN_DIR)/goveralls -coverprofile=$(COVERAGE_PROFILE) -service=github
 
 .PHONY: enforce
 enforce:
