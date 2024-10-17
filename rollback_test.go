@@ -16,8 +16,10 @@ func TestRollback(t *testing.T) {
 		User:     os.Getenv("TEST_DATABASE_USER"),
 		Database: os.Getenv("TEST_DATABASE_NAME"),
 	})
+	db.AddQueryHook(logQueryHook{})
+	m := newMigrator(db, RunOptions{})
 
-	err := ensureMigrationTables(db)
+	err := m.ensureMigrationTables()
 	require.Nil(t, err)
 
 	defer clearMigrations(t, db)
@@ -31,7 +33,7 @@ func TestRollback(t *testing.T) {
 			{Name: "456", Up: noopMigration, Down: noopMigration},
 		}
 
-		err := rollback(db)
+		err := m.rollback()
 		assert.Nil(tt, err)
 
 		assert.Equal(tt, "456", migrations[0].Name)
@@ -46,11 +48,11 @@ func TestRollback(t *testing.T) {
 			{Name: "456", Up: noopMigration, Down: noopMigration},
 		}
 
-		err := acquireLock(db)
+		err := m.acquireLock()
 		assert.Nil(tt, err)
-		defer releaseLock(db)
+		defer m.releaseLock()
 
-		err = rollback(db)
+		err = m.rollback()
 		assert.Equal(tt, ErrAlreadyLocked, err)
 	})
 
@@ -62,7 +64,7 @@ func TestRollback(t *testing.T) {
 			{Name: "456", Up: noopMigration, Down: noopMigration},
 		}
 
-		err := rollback(db)
+		err := m.rollback()
 		assert.Nil(tt, err)
 
 		count, err := db.Model(&migration{}).Count()
@@ -80,14 +82,14 @@ func TestRollback(t *testing.T) {
 			{Name: "010", Up: noopMigration, Down: noopMigration},
 		}
 
-		m := migrations[:2]
-		_, err := db.Model(&m).Insert()
+		mig := migrations[:2]
+		_, err := db.Model(&mig).Insert()
 		assert.Nil(tt, err)
 
-		err = rollback(db)
+		err = m.rollback()
 		assert.Nil(tt, err)
 
-		batch, err := getLastBatchNumber(db)
+		batch, err := m.getLastBatchNumber()
 		assert.Nil(tt, err)
 		assert.Equal(tt, batch, int32(4))
 
@@ -106,7 +108,7 @@ func TestRollback(t *testing.T) {
 		_, err := db.Model(&migrations).Insert()
 		assert.Nil(tt, err)
 
-		err = rollback(db)
+		err = m.rollback()
 		assert.EqualError(tt, err, "123: error")
 
 		assertTable(tt, db, "test_table", false)
@@ -122,7 +124,7 @@ func TestRollback(t *testing.T) {
 		_, err := db.Model(&migrations).Insert()
 		assert.Nil(tt, err)
 
-		err = rollback(db)
+		err = m.rollback()
 		assert.EqualError(tt, err, "123: error")
 
 		assertTable(tt, db, "test_table", true)

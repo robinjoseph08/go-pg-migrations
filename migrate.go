@@ -22,7 +22,7 @@ func Register(name string, up, down func(orm.DB) error, opts MigrationOptions) {
 	})
 }
 
-func migrate(db *pg.DB) (err error) {
+func (m *migrator) migrate() (err error) {
 	// sort the registered migrations by name (which will sort by the
 	// timestamp in their names)
 	sort.Slice(migrations, func(i, j int) bool {
@@ -30,7 +30,7 @@ func migrate(db *pg.DB) (err error) {
 	})
 
 	// look at the migrations table to see the already run migrations
-	completed, err := getCompletedMigrations(db)
+	completed, err := m.getCompletedMigrations()
 	if err != nil {
 		return err
 	}
@@ -46,19 +46,19 @@ func migrate(db *pg.DB) (err error) {
 	}
 
 	// acquire the migration lock from the migrations_lock table
-	err = acquireLock(db)
+	err = m.acquireLock()
 	if err != nil {
 		return err
 	}
 	defer func() {
-		e := releaseLock(db)
+		e := m.releaseLock()
 		if e != nil && err == nil {
 			err = e
 		}
 	}()
 
 	// find the last batch number
-	batch, err := getLastBatchNumber(db)
+	batch, err := m.getLastBatchNumber()
 	if err != nil {
 		return err
 	}
@@ -66,38 +66,44 @@ func migrate(db *pg.DB) (err error) {
 
 	fmt.Printf("Running batch %d with %d migration(s)...\n", batch, len(uncompleted))
 
-	for _, m := range uncompleted {
-		m.Batch = batch
+	for _, mig := range uncompleted {
 		var err error
-		if m.DisableTransaction {
-			err = m.Up(db)
+		if mig.DisableTransaction {
+			err = mig.Up(m.db)
 		} else {
-			err = db.RunInTransaction(db.Context(), func(tx *pg.Tx) error {
-				return m.Up(tx)
+			err = m.db.RunInTransaction(m.db.Context(), func(tx *pg.Tx) error {
+				return mig.Up(tx)
 			})
 		}
 		if err != nil {
-			return fmt.Errorf("%s: %s", m.Name, err)
+			return fmt.Errorf("%s: %s", mig.Name, err)
 		}
 
-		m.CompletedAt = time.Now()
-		_, err = db.Model(m).Insert()
-		if err != nil {
-			return fmt.Errorf("%s: %s", m.Name, err)
+		migrationMap := map[string]interface{}{
+			"name":         mig.Name,
+			"batch":        batch,
+			"completed_at": time.Now(),
 		}
-		fmt.Printf("Finished running %q\n", m.Name)
+		_, err = m.db.
+			Model(&migrationMap).
+			Table(m.opts.MigrationsTableName).
+			Insert()
+		if err != nil {
+			return fmt.Errorf("%s: %s", mig.Name, err)
+		}
+		fmt.Printf("Finished running %q\n", mig.Name)
 	}
 
 	return nil
 }
 
-func getCompletedMigrations(db orm.DB) ([]*migration, error) {
+func (m *migrator) getCompletedMigrations() ([]*migration, error) {
 	var completed []*migration
 
-	err := db.
-		Model(&completed).
+	err := orm.NewQuery(m.db).
+		Table(m.opts.MigrationsTableName).
 		Order("id").
-		Select()
+		Select(&completed)
 	if err != nil {
 		return nil, err
 	}
@@ -105,37 +111,18 @@ func getCompletedMigrations(db orm.DB) ([]*migration, error) {
 	return completed, nil
 }
 
-func filterMigrations(all, subset []*migration, wantCompleted bool) []*migration {
-	subsetMap := map[string]bool{}
-
-	for _, c := range subset {
-		subsetMap[c.Name] = true
-	}
-
-	var d []*migration
-
-	for _, a := range all {
-		if subsetMap[a.Name] == wantCompleted {
-			d = append(d, a)
-		}
-	}
-
-	return d
-}
-
-func acquireLock(db *pg.DB) error {
-	l := lock{ID: lockID, IsLocked: true}
-
-	result, err := db.Model(&l).
+func (m *migrator) acquireLock() error {
+	l := map[string]interface{}{"is_locked": true}
+	result, err := m.db.
+		Model(&l).
+		Table(m.opts.MigrationLockTableName).
 		Column("is_locked").
-		WherePK().
+		Where("id = ?", lockID).
 		Where("is_locked = ?", false).
 		Update()
-
 	if err != nil {
 		return err
 	}
-
 	if result.RowsAffected() == 0 {
 		return ErrAlreadyLocked
 	}
@@ -143,21 +130,41 @@ func acquireLock(db *pg.DB) error {
 	return nil
 }
 
-func releaseLock(db orm.DB) error {
-	l := lock{ID: lockID, IsLocked: false}
-	_, err := db.Model(&l).
-		WherePK().
+func (m *migrator) releaseLock() error {
+	l := map[string]interface{}{"is_locked": true}
+	_, err := m.db.
+		Model(&l).
+		Table(m.opts.MigrationLockTableName).
+		Column("is_locked").
+		Where("id = ?", lockID).
 		Update()
 	return err
 }
 
-func getLastBatchNumber(db orm.DB) (int32, error) {
+func (m *migrator) getLastBatchNumber() (int32, error) {
 	var res struct{ Batch int32 }
-	err := db.Model(&migration{}).
+	err := orm.NewQuery(m.db).
+		Table(m.opts.MigrationsTableName).
 		ColumnExpr("COALESCE(MAX(batch), 0) AS batch").
 		Select(&res)
 	if err != nil {
 		return 0, err
 	}
 	return res.Batch, nil
+}
+
+func filterMigrations(all, subset []*migration, wantCompleted bool) []*migration {
+	subsetMap := map[string]bool{}
+	for _, c := range subset {
+		subsetMap[c.Name] = true
+	}
+
+	var d []*migration
+	for _, a := range all {
+		if subsetMap[a.Name] == wantCompleted {
+			d = append(d, a)
+		}
+	}
+
+	return d
 }

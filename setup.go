@@ -1,40 +1,49 @@
 package migrations
 
 import (
-	"github.com/go-pg/pg/v10"
+	"fmt"
+
 	"github.com/go-pg/pg/v10/orm"
 )
 
-func ensureMigrationTables(db *pg.DB) error {
-	exists, err := checkIfTableExists("migrations", db)
+func (m *migrator) ensureMigrationTables() error {
+	exists, err := m.checkIfTableExists(m.opts.MigrationsTableName)
 	if err != nil {
 		return err
 	}
 	if !exists {
-		err = createTable(&migration{}, db)
+		_, err = m.db.Exec(fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %q ("id" SERIAL PRIMARY KEY, "name" TEXT NOT NULL, "batch" INTEGER NOT NULL, "completed_at" TIMESTAMPTZ NOT NULL)`, escapeTableName(m.opts.MigrationsTableName)))
 		if err != nil {
 			return err
 		}
 	}
 
-	exists, err = checkIfTableExists("migration_lock", db)
+	exists, err = m.checkIfTableExists(m.opts.MigrationLockTableName)
 	if err != nil {
 		return err
 	}
 	if !exists {
-		err = createTable(&lock{}, db)
+		_, err = m.db.Exec(fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %q ("id" TEXT PRIMARY KEY, "is_locked" BOOLEAN NOT NULL)`, escapeTableName(m.opts.MigrationLockTableName)))
 		if err != nil {
 			return err
 		}
 	}
 
-	count, err := db.Model(&lock{}).Count()
+	count, err := orm.NewQuery(m.db).
+		Table(m.opts.MigrationLockTableName).
+		Count()
 	if err != nil {
 		return err
 	}
 	if count == 0 {
-		l := lock{ID: lockID, IsLocked: false}
-		_, err = db.Model(&l).Insert()
+		l := map[string]interface{}{
+			"id":        lockID,
+			"is_locked": false,
+		}
+		_, err = m.db.
+			Model(&l).
+			Table(m.opts.MigrationLockTableName).
+			Insert()
 		if err != nil {
 			return err
 		}
@@ -43,8 +52,8 @@ func ensureMigrationTables(db *pg.DB) error {
 	return nil
 }
 
-func checkIfTableExists(name string, db orm.DB) (bool, error) {
-	count, err := orm.NewQuery(db).
+func (m *migrator) checkIfTableExists(name string) (bool, error) {
+	count, err := orm.NewQuery(m.db).
 		Table("information_schema.tables").
 		Where("table_name = ?", name).
 		Where("table_schema = current_schema").
@@ -53,9 +62,4 @@ func checkIfTableExists(name string, db orm.DB) (bool, error) {
 		return false, err
 	}
 	return count > 0, nil
-}
-
-func createTable(model interface{}, db *pg.DB) error {
-	opts := orm.CreateTableOptions{IfNotExists: true}
-	return db.Model(model).CreateTable(&opts)
 }

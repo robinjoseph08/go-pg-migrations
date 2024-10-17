@@ -31,3 +31,45 @@ func TestRun(t *testing.T) {
 	err = Run(db, tmp, []string{"cmd", "rollback"})
 	assert.Nil(t, err)
 }
+
+func TestRunWithOptions(t *testing.T) {
+	tmp := os.TempDir()
+	db := pg.Connect(&pg.Options{
+		Addr:     "localhost:5432",
+		User:     os.Getenv("TEST_DATABASE_USER"),
+		Database: os.Getenv("TEST_DATABASE_NAME"),
+	})
+	db.AddQueryHook(logQueryHook{})
+	dropMigrationTables(t, db)
+
+	err := RunWithOptions(db, tmp, []string{"cmd", "migrate"}, RunOptions{})
+	assert.Nil(t, err)
+	assertTable(t, db, "migrations", true)
+	assertTable(t, db, "migration_lock", true)
+	assertTable(t, db, "custom_migrations", false)
+	assertTable(t, db, "custom_migration_lock", false)
+
+	dropMigrationTables(t, db)
+
+	err = RunWithOptions(db, tmp, []string{"cmd", "migrate"}, RunOptions{
+		MigrationsTableName:    "custom_migrations",
+		MigrationLockTableName: "custom_migration_lock",
+	})
+	assert.Nil(t, err)
+	assertTable(t, db, "custom_migrations", true)
+	assertTable(t, db, "custom_migration_lock", true)
+	assertTable(t, db, "migrations", false)
+	assertTable(t, db, "migration_lock", false)
+
+	dropMigrationTables(t, db)
+
+	err = RunWithOptions(db, tmp, []string{"cmd", "rollback"}, RunOptions{
+		MigrationsTableName:    "custom_migrations",
+		MigrationLockTableName: "custom_migration_lock",
+	})
+	assert.Nil(t, err)
+	assertTable(t, db, "custom_migrations", true)
+	assertTable(t, db, "custom_migration_lock", true)
+	assertTable(t, db, "migrations", false)
+	assertTable(t, db, "migration_lock", false)
+}

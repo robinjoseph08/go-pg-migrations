@@ -56,6 +56,11 @@ postgres:
 		-p 5432:5432 \
 		postgres:11
 
+.PHONY: psql
+psql:
+	@echo "---> Running psql"
+	psql -h localhost -p 5432 -U $(TEST_DATABASE_USER) -d $(TEST_DATABASE_NAME)
+
 .PHONY: release
 release:
 	@echo "---> Creating new release"

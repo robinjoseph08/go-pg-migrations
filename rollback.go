@@ -7,7 +7,7 @@ import (
 	"github.com/go-pg/pg/v10"
 )
 
-func rollback(db *pg.DB) error {
+func (m *migrator) rollback() error {
 	// sort the registered migrations by name (which will sort by the
 	// timestamp in their names)
 	sort.Slice(migrations, func(i, j int) bool {
@@ -15,19 +15,19 @@ func rollback(db *pg.DB) error {
 	})
 
 	// look at the migrations table to see the already run migrations
-	completed, err := getCompletedMigrations(db)
+	completed, err := m.getCompletedMigrations()
 	if err != nil {
 		return err
 	}
 
 	// acquire the migration lock from the migrations_lock table
-	err = acquireLock(db)
+	err = m.acquireLock()
 	if err != nil {
 		return err
 	}
-	defer releaseLock(db)
+	defer m.releaseLock()
 
-	batch, err := getLastBatchNumber(db)
+	batch, err := m.getLastBatchNumber()
 	if err != nil {
 		return err
 	}
@@ -42,24 +42,25 @@ func rollback(db *pg.DB) error {
 
 	fmt.Printf("Rolling back batch %d with %d migration(s)...\n", batch, len(rollback))
 
-	for _, m := range rollback {
+	for _, mig := range rollback {
 		var err error
-		if m.DisableTransaction {
-			err = m.Down(db)
+		if mig.DisableTransaction {
+			err = mig.Down(m.db)
 		} else {
-			err = db.RunInTransaction(db.Context(), func(tx *pg.Tx) error {
-				return m.Down(tx)
+			err = m.db.RunInTransaction(m.db.Context(), func(tx *pg.Tx) error {
+				return mig.Down(tx)
 			})
 		}
 		if err != nil {
-			return fmt.Errorf("%s: %s", m.Name, err)
+			return fmt.Errorf("%s: %s", mig.Name, err)
 		}
 
-		_, err = db.Model(m).Where("name = ?", m.Name).Delete()
+		_, err = m.db.
+			Exec(fmt.Sprintf("DELETE FROM %q WHERE name = ?", escapeTableName(m.opts.MigrationsTableName)), mig.Name)
 		if err != nil {
-			return fmt.Errorf("%s: %s", m.Name, err)
+			return fmt.Errorf("%s: %s", mig.Name, err)
 		}
-		fmt.Printf("Finished rolling back %q\n", m.Name)
+		fmt.Printf("Finished rolling back %q\n", mig.Name)
 	}
 
 	return nil
@@ -67,10 +68,9 @@ func rollback(db *pg.DB) error {
 
 func getMigrationsForBatch(migrations []*migration, batch int32) []*migration {
 	var m []*migration
-
-	for _, migration := range migrations {
-		if migration.Batch == batch {
-			m = append(m, migration)
+	for _, mig := range migrations {
+		if mig.Batch == batch {
+			m = append(m, mig)
 		}
 	}
 

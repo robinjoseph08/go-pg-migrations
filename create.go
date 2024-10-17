@@ -33,7 +33,7 @@ func init() {
 }
 `
 
-func create(directory, name string) error {
+func (m *migrator) create(directory, name string) error {
 	version := time.Now().UTC().Format(timeFormat)
 	fullname := fmt.Sprintf("%s_%s", version, name)
 	filename := path.Join(directory, fullname+".go")
