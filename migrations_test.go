@@ -40,36 +40,43 @@ func TestRunWithOptions(t *testing.T) {
 		Database: os.Getenv("TEST_DATABASE_NAME"),
 	})
 	db.AddQueryHook(logQueryHook{})
-	dropMigrationTables(t, db)
 
-	err := RunWithOptions(db, tmp, []string{"cmd", "migrate"}, RunOptions{})
-	assert.Nil(t, err)
-	assertTable(t, db, "migrations", true)
-	assertTable(t, db, "migration_lock", true)
-	assertTable(t, db, "custom_migrations", false)
-	assertTable(t, db, "custom_migration_lock", false)
+	t.Run("default", func(tt *testing.T) {
+		dropMigrationTables(t, db)
 
-	dropMigrationTables(t, db)
-
-	err = RunWithOptions(db, tmp, []string{"cmd", "migrate"}, RunOptions{
-		MigrationsTableName:    "custom_migrations",
-		MigrationLockTableName: "custom_migration_lock",
+		err := RunWithOptions(db, tmp, []string{"cmd", "migrate"}, RunOptions{})
+		assert.Nil(t, err)
+		assertTable(t, db, "migrations", true)
+		assertTable(t, db, "migration_lock", true)
+		assertTable(t, db, "custom_migrations", false)
+		assertTable(t, db, "custom_migration_lock", false)
 	})
-	assert.Nil(t, err)
-	assertTable(t, db, "custom_migrations", true)
-	assertTable(t, db, "custom_migration_lock", true)
-	assertTable(t, db, "migrations", false)
-	assertTable(t, db, "migration_lock", false)
 
-	dropMigrationTables(t, db)
+	t.Run("custom tables - migrate", func(tt *testing.T) {
+		dropMigrationTables(t, db)
 
-	err = RunWithOptions(db, tmp, []string{"cmd", "rollback"}, RunOptions{
-		MigrationsTableName:    "custom_migrations",
-		MigrationLockTableName: "custom_migration_lock",
+		err := RunWithOptions(db, tmp, []string{"cmd", "migrate"}, RunOptions{
+			MigrationsTableName:    "custom_migrations",
+			MigrationLockTableName: "custom_migration_lock",
+		})
+		assert.Nil(t, err)
+		assertTable(t, db, "custom_migrations", true)
+		assertTable(t, db, "custom_migration_lock", true)
+		assertTable(t, db, "migrations", false)
+		assertTable(t, db, "migration_lock", false)
 	})
-	assert.Nil(t, err)
-	assertTable(t, db, "custom_migrations", true)
-	assertTable(t, db, "custom_migration_lock", true)
-	assertTable(t, db, "migrations", false)
-	assertTable(t, db, "migration_lock", false)
+
+	t.Run("custom tables - rollback", func(tt *testing.T) {
+		dropMigrationTables(t, db)
+
+		err := RunWithOptions(db, tmp, []string{"cmd", "rollback"}, RunOptions{
+			MigrationsTableName:    "custom_migrations",
+			MigrationLockTableName: "custom_migration_lock",
+		})
+		assert.Nil(t, err)
+		assertTable(t, db, "custom_migrations", true)
+		assertTable(t, db, "custom_migration_lock", true)
+		assertTable(t, db, "migrations", false)
+		assertTable(t, db, "migration_lock", false)
+	})
 }
