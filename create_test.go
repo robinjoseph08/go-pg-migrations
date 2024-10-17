@@ -15,8 +15,9 @@ func TestCreate(t *testing.T) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	tmp := os.TempDir()
 	name := fmt.Sprintf("create_test_migration_%d", r.Int())
+	m := newMigrator(nil, RunOptions{})
 
-	err := create(tmp, name)
+	err := m.create(tmp, name)
 	assert.Nil(t, err)
 
 	files, err := os.ReadDir(tmp)

@@ -48,10 +48,10 @@ func TestMigrate(t *testing.T) {
 		User:     os.Getenv("TEST_DATABASE_USER"),
 		Database: os.Getenv("TEST_DATABASE_NAME"),
 	})
-
 	db.AddQueryHook(logQueryHook{})
+	m := newMigrator(db, RunOptions{})
 
-	err := ensureMigrationTables(db)
+	err := m.ensureMigrationTables()
 	require.Nil(t, err)
 
 	defer clearMigrations(t, db)
@@ -65,7 +65,7 @@ func TestMigrate(t *testing.T) {
 			{Name: "123", Up: noopMigration, Down: noopMigration},
 		}
 
-		err := migrate(db)
+		err := m.migrate()
 		assert.Nil(tt, err)
 
 		assert.Equal(tt, "123", migrations[0].Name)
@@ -83,7 +83,7 @@ func TestMigrate(t *testing.T) {
 		_, err := db.Model(migrations[0]).Insert()
 		assert.Nil(tt, err)
 
-		err = migrate(db)
+		err = m.migrate()
 		assert.Nil(tt, err)
 
 		var m []*migration
@@ -105,7 +105,7 @@ func TestMigrate(t *testing.T) {
 		_, err := db.Model(&migrations).Insert()
 		assert.Nil(tt, err)
 
-		err = migrate(db)
+		err = m.migrate()
 		assert.Nil(tt, err)
 
 		count, err := db.Model(&migration{}).Where("batch = 2").Count()
@@ -121,11 +121,11 @@ func TestMigrate(t *testing.T) {
 			{Name: "456", Up: noopMigration, Down: noopMigration},
 		}
 
-		err := acquireLock(db)
+		err := m.acquireLock()
 		assert.Nil(tt, err)
-		defer releaseLock(db)
+		defer m.releaseLock()
 
-		err = migrate(db)
+		err = m.migrate()
 		assert.Equal(tt, ErrAlreadyLocked, err)
 	})
 
@@ -141,10 +141,10 @@ func TestMigrate(t *testing.T) {
 		_, err := db.Model(migrations[0]).Insert()
 		assert.Nil(tt, err)
 
-		err = migrate(db)
+		err = m.migrate()
 		assert.Nil(tt, err)
 
-		batch, err := getLastBatchNumber(db)
+		batch, err := m.getLastBatchNumber()
 		assert.Nil(tt, err)
 		assert.Equal(tt, batch, int32(6))
 
@@ -160,7 +160,7 @@ func TestMigrate(t *testing.T) {
 			{Name: "123", Up: erringMigration, Down: noopMigration, DisableTransaction: false},
 		}
 
-		err := migrate(db)
+		err := m.migrate()
 		assert.EqualError(tt, err, "123: error")
 
 		assertTable(tt, db, "test_table", false)
@@ -173,7 +173,7 @@ func TestMigrate(t *testing.T) {
 			{Name: "123", Up: erringMigration, Down: noopMigration, DisableTransaction: true},
 		}
 
-		err := migrate(db)
+		err := m.migrate()
 		assert.EqualError(tt, err, "123: error")
 
 		assertTable(tt, db, "test_table", true)
@@ -206,6 +206,8 @@ func clearMigrations(t *testing.T, db *pg.DB) {
 	t.Helper()
 
 	_, err := db.Exec("DELETE FROM migrations")
+	assert.Nil(t, err)
+	_, err = db.Exec("UPDATE migration_lock SET is_locked = FALSE")
 	assert.Nil(t, err)
 	_, err = db.Exec("DROP TABLE IF EXISTS test_table")
 	assert.Nil(t, err)

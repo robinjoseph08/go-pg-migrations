@@ -15,11 +15,12 @@ func TestEnsureMigrationTables(t *testing.T) {
 		User:     os.Getenv("TEST_DATABASE_USER"),
 		Database: os.Getenv("TEST_DATABASE_NAME"),
 	})
+	m := newMigrator(db, RunOptions{})
 
 	// drop tables to start from a clean database
 	dropMigrationTables(t, db)
 
-	err := ensureMigrationTables(db)
+	err := m.ensureMigrationTables()
 	assert.Nil(t, err)
 
 	tables := []string{"migrations", "migration_lock"}
@@ -31,7 +32,7 @@ func TestEnsureMigrationTables(t *testing.T) {
 	assertOneLock(t, db)
 
 	// with existing tables, ensureMigrationTables should do anything
-	err = ensureMigrationTables(db)
+	err = m.ensureMigrationTables()
 	assert.Nil(t, err)
 
 	for _, table := range tables {
@@ -44,9 +45,13 @@ func TestEnsureMigrationTables(t *testing.T) {
 func dropMigrationTables(t *testing.T, db *pg.DB) {
 	t.Helper()
 
-	_, err := db.Exec("DROP TABLE migrations")
+	_, err := db.Exec("DROP TABLE IF EXISTS migrations")
 	assert.Nil(t, err)
-	_, err = db.Exec("DROP TABLE migration_lock")
+	_, err = db.Exec("DROP TABLE IF EXISTS migration_lock")
+	assert.Nil(t, err)
+	_, err = db.Exec("DROP TABLE IF EXISTS custom_migrations")
+	assert.Nil(t, err)
+	_, err = db.Exec("DROP TABLE IF EXISTS custom_migration_lock")
 	assert.Nil(t, err)
 }
 
