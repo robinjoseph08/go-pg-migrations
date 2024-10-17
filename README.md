@@ -32,7 +32,7 @@ files to be saved in (which will be the same directory of the main package, e.g.
 `example`), an instance of `*pg.DB`, and `os.Args`; and log any potential errors
 that could be returned.
 
-Once this has been set up, then you can use the `create`, `migrate`, `rollback`,
+Once this has been set up, then you can use the `create`, `migrate`, `status`, `rollback`,
 `help` commands like so:
 
 ```
@@ -42,6 +42,13 @@ Creating example/20180812001528_create_users_table.go...
 $ go run example/*.go migrate
 Running batch 1 with 1 migration(s)...
 Finished running "20180812001528_create_users_table"
+
+$ go run example/*.go status
++---------+-----------------------------------+-------+
+| Applied | Migration                         | Batch |
++---------+-----------------------------------+-------+
+|    √    | 20180812001528_create_users_table |     1 |
++---------+-----------------------------------+-------+
 
 $ go run example/*.go rollback
 Rolling back batch 1 with 1 migration(s)...
@@ -55,12 +62,14 @@ Commands:
   create   - create a new migration in example with the provided name
   migrate  - run any migrations that haven't been run yet
   rollback - roll back the previous run batch of migrations
+  status   - show the status of each migration
   help     - print this help text
 
 Examples:
   go run example/*.go create create_users_table
   go run example/*.go migrate
   go run example/*.go rollback
+  go run example/*.go status
   go run example/*.go help
 ```
 
