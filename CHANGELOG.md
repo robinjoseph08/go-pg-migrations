@@ -1,4 +1,19 @@
 
+<a name="v3.1.0"></a>
+## [v3.1.0](https://github.com/robinjoseph08/go-pg-migrations/compare/v3.0.0...v3.1.0) (2024-10-17)
+
+### Chore
+
+* **ci:** set up Github Actions for CI ([#37](https://github.com/robinjoseph08/go-pg-migrations/issues/37))
+* **deps:** update deps because of vulnerabilities ([#36](https://github.com/robinjoseph08/go-pg-migrations/issues/36))
+* **update:** update go and golangci-lint ([#35](https://github.com/robinjoseph08/go-pg-migrations/issues/35))
+
+### Features
+
+* **options:** allow customizing the names of the migration tables ([#38](https://github.com/robinjoseph08/go-pg-migrations/issues/38))
+* **status:** Add status command ([#29](https://github.com/robinjoseph08/go-pg-migrations/issues/29))
+
+
 <a name="v3.0.0"></a>
 ## [v3.0.0](https://github.com/robinjoseph08/go-pg-migrations/compare/v2.1.0...v3.0.0) (2020-10-26)
 
