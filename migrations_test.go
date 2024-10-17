@@ -42,41 +42,41 @@ func TestRunWithOptions(t *testing.T) {
 	db.AddQueryHook(logQueryHook{})
 
 	t.Run("default", func(tt *testing.T) {
-		dropMigrationTables(t, db)
+		dropMigrationTables(tt, db)
 
 		err := RunWithOptions(db, tmp, []string{"cmd", "migrate"}, RunOptions{})
-		assert.Nil(t, err)
-		assertTable(t, db, "migrations", true)
-		assertTable(t, db, "migration_lock", true)
-		assertTable(t, db, "custom_migrations", false)
-		assertTable(t, db, "custom_migration_lock", false)
+		assert.Nil(tt, err)
+		assertTable(tt, db, "migrations", true)
+		assertTable(tt, db, "migration_lock", true)
+		assertTable(tt, db, "custom_migrations", false)
+		assertTable(tt, db, "custom_migration_lock", false)
 	})
 
 	t.Run("custom tables - migrate", func(tt *testing.T) {
-		dropMigrationTables(t, db)
+		dropMigrationTables(tt, db)
 
 		err := RunWithOptions(db, tmp, []string{"cmd", "migrate"}, RunOptions{
 			MigrationsTableName:    "custom_migrations",
 			MigrationLockTableName: "custom_migration_lock",
 		})
-		assert.Nil(t, err)
-		assertTable(t, db, "custom_migrations", true)
-		assertTable(t, db, "custom_migration_lock", true)
-		assertTable(t, db, "migrations", false)
-		assertTable(t, db, "migration_lock", false)
+		assert.Nil(tt, err)
+		assertTable(tt, db, "custom_migrations", true)
+		assertTable(tt, db, "custom_migration_lock", true)
+		assertTable(tt, db, "migrations", false)
+		assertTable(tt, db, "migration_lock", false)
 	})
 
 	t.Run("custom tables - rollback", func(tt *testing.T) {
-		dropMigrationTables(t, db)
+		dropMigrationTables(tt, db)
 
 		err := RunWithOptions(db, tmp, []string{"cmd", "rollback"}, RunOptions{
 			MigrationsTableName:    "custom_migrations",
 			MigrationLockTableName: "custom_migration_lock",
 		})
-		assert.Nil(t, err)
-		assertTable(t, db, "custom_migrations", true)
-		assertTable(t, db, "custom_migration_lock", true)
-		assertTable(t, db, "migrations", false)
-		assertTable(t, db, "migration_lock", false)
+		assert.Nil(tt, err)
+		assertTable(tt, db, "custom_migrations", true)
+		assertTable(tt, db, "custom_migration_lock", true)
+		assertTable(tt, db, "migrations", false)
+		assertTable(tt, db, "migration_lock", false)
 	})
 }
