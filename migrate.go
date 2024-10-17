@@ -131,7 +131,7 @@ func (m *migrator) acquireLock() error {
 }
 
 func (m *migrator) releaseLock() error {
-	l := map[string]interface{}{"is_locked": true}
+	l := map[string]interface{}{"is_locked": false}
 	_, err := m.db.
 		Model(&l).
 		Table(m.opts.MigrationLockTableName).

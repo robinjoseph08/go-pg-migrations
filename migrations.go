@@ -90,7 +90,7 @@ func RunWithOptions(db *pg.DB, directory string, args []string, opts RunOptions)
 			return err
 		}
 
-		return status(db, os.Stdout)
+		return m.status(os.Stdout)
 	default:
 		help(directory)
 		return nil

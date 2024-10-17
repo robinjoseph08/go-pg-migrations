@@ -7,15 +7,9 @@ import (
 	"sort"
 	"strings"
 	"unicode/utf8"
-
-	"github.com/go-pg/pg/v10"
 )
 
-type migrationWithStatus struct {
-	migration
-}
-
-func status(db *pg.DB, w io.Writer) error {
+func (m *migrator) status(w io.Writer) error {
 	// sort the registered migrations by name (which will sort by the
 	// timestamp in their names)
 	sort.Slice(migrations, func(i, j int) bool {
@@ -23,7 +17,7 @@ func status(db *pg.DB, w io.Writer) error {
 	})
 
 	// look at the migrations table to see the already run migrations
-	completed, err := getCompletedMigrations(db)
+	completed, err := m.getCompletedMigrations()
 	if err != nil {
 		return err
 	}
@@ -35,7 +29,7 @@ func status(db *pg.DB, w io.Writer) error {
 	return writeStatusTable(w, completed, uncompleted)
 }
 
-func writeStatusTable(w io.Writer, completed []migration, uncompleted []migration) error {
+func writeStatusTable(w io.Writer, completed []*migration, uncompleted []*migration) error {
 	if len(completed)+len(uncompleted) == 0 {
 		_, err := fmt.Fprintln(w, "No migrations found")
 		return err
@@ -76,7 +70,6 @@ func writeStatusTable(w io.Writer, completed []migration, uncompleted []migratio
 func maxInt(a, b int) int {
 	if a > b {
 		return a
-	} else {
-		return b
 	}
+	return b
 }

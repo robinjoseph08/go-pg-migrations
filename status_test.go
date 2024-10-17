@@ -16,20 +16,20 @@ func TestStatus(t *testing.T) {
 		User:     os.Getenv("TEST_DATABASE_USER"),
 		Database: os.Getenv("TEST_DATABASE_NAME"),
 	})
-
 	db.AddQueryHook(logQueryHook{})
+	m := newMigrator(db, RunOptions{})
 
-	err := ensureMigrationTables(db)
+	err := m.ensureMigrationTables()
 	require.Nil(t, err)
 
 	defer clearMigrations(t, db)
 	defer resetMigrations(t)
 
-	completed := []migration{
+	completed := []*migration{
 		{Name: "2021_02_26_151503_dump", Up: noopMigration, Down: noopMigration, Batch: 1},
 		{Name: "2021_02_26_151504_create_a_dump_table_for_test", Up: noopMigration, Down: noopMigration, Batch: 2},
 	}
-	uncompleted := []migration{
+	uncompleted := []*migration{
 		{Name: "2021_02_26_151502_create_2nd_dump_table", Up: noopMigration, Down: noopMigration},
 		{Name: "2021_02_26_151505_create_3rd_dump_table", Up: noopMigration, Down: noopMigration},
 	}
@@ -49,15 +49,15 @@ func TestStatus(t *testing.T) {
 		resetMigrations(tt)
 
 		migrations = completed[:1]
-		err := migrate(db)
+		err := m.migrate()
 		require.Nil(tt, err, "migrate: %v", err)
 		migrations = completed[:2]
-		err = migrate(db)
+		err = m.migrate()
 		require.Nil(tt, err, "migrate: %v", err)
 
 		migrations = append(migrations, uncompleted...)
 		bf := bytes.NewBuffer(nil)
-		err = status(db, bf)
+		err = m.status(bf)
 		require.Nil(tt, err, "status: %v", err)
 
 		got := strings.TrimSpace(bf.String())
