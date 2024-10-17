@@ -32,8 +32,11 @@ files to be saved in (which will be the same directory of the main package, e.g.
 `example`), an instance of `*pg.DB`, and `os.Args`; and log any potential errors
 that could be returned.
 
-Once this has been set up, then you can use the `create`, `migrate`, `status`, `rollback`,
-`help` commands like so:
+You can also call `migrations.RunWithOptions` to configure the way that the
+migrations run (e.g. customize the name of the migration tables).
+
+Once this has been set up, then you can use the `create`, `migrate`, `status`,
+`rollback`, `help` commands like so:
 
 ```
 $ go run example/*.go create create_users_table
