@@ -1,6 +1,6 @@
 module github.com/robinjoseph08/go-pg-migrations/v3
 
-go 1.23
+go 1.24.0
 
 require (
 	github.com/git-chglog/git-chglog v0.0.0-20200414013904-db796966b373
@@ -30,8 +30,8 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.0.0-beta.8 // indirect
 	github.com/vmihailenco/tagparser v0.1.2 // indirect
 	go.opentelemetry.io/otel v0.13.0 // indirect
-	golang.org/x/crypto v0.28.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/tools v0.0.0-20200522201501-cb1345f3a375 // indirect
 	gopkg.in/AlecAivazis/survey.v1 v1.8.7 // indirect
 	gopkg.in/kyokomi/emoji.v1 v1.5.1 // indirect
